@@ -173,21 +173,26 @@
 
     <!-- Live Queue Snapshot Section (Important for both Admin and Staff) -->
     <div class="bg-white rounded-3xl border border-emerald-900/10 shadow-xs p-5 space-y-4">
-        <div class="flex items-center justify-between border-b border-stone-100 pb-3">
-            <div class="flex items-center space-x-2.5">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <h2 class="text-sm sm:text-base font-black text-stone-900 flex items-center space-x-1.5">
-                    <i data-lucide="users" class="w-4 h-4 text-emerald-800"></i>
-                    <span>Available Staff in Queue</span>
-                </h2>
-                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200">
+        <div class="border-b border-stone-100 pb-3 space-y-2">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse flex-shrink-0"></span>
+                    <h2 class="text-sm sm:text-base font-black text-stone-900 flex items-center space-x-1.5">
+                        <i data-lucide="users" class="w-4 h-4 text-emerald-800"></i>
+                        <span>Available Staff in Queue</span>
+                    </h2>
+                </div>
+                <a href="{{ route('queue.index') }}" class="text-xs font-bold text-emerald-700 hover:text-emerald-800 inline-flex items-center space-x-1 flex-shrink-0">
+                    <span>Queue Board</span>
+                    <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                </a>
+            </div>
+            <div class="flex items-center pl-5">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 mr-1.5"></span>
                     {{ $queueAvailable->count() }} Available
                 </span>
             </div>
-            <a href="{{ route('queue.index') }}" class="text-xs font-bold text-emerald-700 hover:text-emerald-800 inline-flex items-center space-x-1">
-                <span>Queue Board</span>
-                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-            </a>
         </div>
 
         @if($queueAvailable->isEmpty())

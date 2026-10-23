@@ -24,19 +24,22 @@
 
     <!-- Live Available Queue -->
     <div class="bg-white rounded-3xl border-2 border-emerald-300/80 p-5 sm:p-6 shadow-xs space-y-4">
-        <div class="flex items-center justify-between border-b border-stone-100 pb-3">
-            <div class="flex items-center space-x-3">
-                <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
-                <h2 class="text-base sm:text-lg font-black text-stone-900">
+        <div class="border-b border-stone-100 pb-3 space-y-2">
+            <div class="flex items-center space-x-2.5">
+                <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse flex-shrink-0"></span>
+                <h2 class="text-base sm:text-lg font-black text-stone-900 leading-snug">
                     Available in Queue (Ready to Serve)
                 </h2>
-                <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-200">
+            </div>
+            <div class="flex items-center justify-between flex-wrap gap-2 pt-0.5 pl-5.5">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-200 shadow-2xs whitespace-nowrap">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 mr-1.5"></span>
                     {{ $availableQueue->count() }} Ready
                 </span>
+                <span class="text-[11px] text-stone-400 font-medium">
+                    Queue order (Turn 1, 2, 3...)
+                </span>
             </div>
-            <span class="text-[11px] text-stone-400 hidden sm:block">
-                Queue order (Turn 1, 2, 3...)
-            </span>
         </div>
 
         @if($availableQueue->isEmpty())
@@ -117,17 +120,20 @@
 
         <!-- Serving In-Shop (Teal) -->
         <div class="bg-white rounded-3xl border border-teal-200/80 p-5 shadow-xs space-y-3">
-            <div class="flex items-center justify-between border-b border-stone-100 pb-2">
+            <div class="border-b border-stone-100 pb-2.5 space-y-1.5">
                 <div class="flex items-center space-x-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-teal-500"></span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-teal-500 flex-shrink-0"></span>
                     <h2 class="text-sm font-black text-stone-900 flex items-center space-x-1.5">
                         <i data-lucide="store" class="w-4 h-4 text-teal-800"></i>
                         <span>Currently Serving In-Shop</span>
                     </h2>
                 </div>
-                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-teal-50 text-teal-800 border border-teal-200">
-                    {{ $servingInShop->count() }} Active
-                </span>
+                <div class="flex items-center pl-4.5">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-teal-50 text-teal-800 border border-teal-200 whitespace-nowrap">
+                        <span class="w-1.5 h-1.5 rounded-full bg-teal-600 mr-1.5"></span>
+                        {{ $servingInShop->count() }} Active
+                    </span>
+                </div>
             </div>
 
             @forelse($servingInShop as $staff)
@@ -155,17 +161,20 @@
 
         <!-- On Home Service (Sky) -->
         <div class="bg-white rounded-3xl border border-sky-200/80 p-5 shadow-xs space-y-3">
-            <div class="flex items-center justify-between border-b border-stone-100 pb-2">
+            <div class="border-b border-stone-100 pb-2.5 space-y-1.5">
                 <div class="flex items-center space-x-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span>
+                    <span class="w-2.5 h-2.5 rounded-full bg-sky-500 flex-shrink-0"></span>
                     <h2 class="text-sm font-black text-stone-900 flex items-center space-x-1.5">
                         <i data-lucide="home" class="w-4 h-4 text-sky-800"></i>
                         <span>Out on Home Service</span>
                     </h2>
                 </div>
-                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 text-sky-800 border border-sky-200">
-                    {{ $onHomeService->count() }} Out
-                </span>
+                <div class="flex items-center pl-4.5">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-sky-50 text-sky-800 border border-sky-200 whitespace-nowrap">
+                        <span class="w-1.5 h-1.5 rounded-full bg-sky-600 mr-1.5"></span>
+                        {{ $onHomeService->count() }} Out
+                    </span>
+                </div>
             </div>
 
             @forelse($onHomeService as $staff)
@@ -196,12 +205,19 @@
     <!-- On Break Section -->
     @if($onBreak->isNotEmpty())
         <div class="bg-white rounded-3xl border border-amber-200/80 p-5 shadow-xs space-y-3">
-            <div class="flex items-center justify-between border-b border-stone-100 pb-2">
-                <h2 class="text-sm font-black text-amber-900 flex items-center space-x-2">
-                    <i data-lucide="coffee" class="w-4 h-4 text-amber-700"></i>
-                    <span>On Break</span>
-                    <span class="px-2 py-0.5 rounded-full text-xs bg-amber-100 text-amber-800 font-bold">{{ $onBreak->count() }}</span>
-                </h2>
+            <div class="border-b border-stone-100 pb-2.5 space-y-1.5">
+                <div class="flex items-center space-x-2">
+                    <h2 class="text-sm font-black text-amber-900 flex items-center space-x-2">
+                        <i data-lucide="coffee" class="w-4 h-4 text-amber-700"></i>
+                        <span>On Break</span>
+                    </h2>
+                </div>
+                <div class="flex items-center">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-200 whitespace-nowrap">
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-600 mr-1.5"></span>
+                        {{ $onBreak->count() }} on break
+                    </span>
+                </div>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 @foreach($onBreak as $staff)
