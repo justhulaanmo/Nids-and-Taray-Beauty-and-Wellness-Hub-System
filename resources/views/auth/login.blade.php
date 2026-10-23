@@ -14,11 +14,22 @@
         .lucide { stroke-width: 1.75px; vertical-align: middle; }
     </style>
 </head>
-<body class="h-full flex items-center justify-center p-4 bg-gradient-to-br from-[#ebf3ed] via-[#f5f8f5] to-[#e4eee6]">
-    <div class="max-w-md w-full bg-white/95 backdrop-blur-xl rounded-3xl shadow-xl shadow-emerald-950/5 border border-emerald-900/10 overflow-hidden text-stone-800">
+<body class="min-h-screen relative flex items-center justify-center p-4 bg-stone-900 overflow-x-hidden">
+
+    <!-- Storefront Background Image with Elegant Dimming & Tint -->
+    <div class="fixed inset-0 z-0">
+        <img src="{{ asset('images/nids-and-taray-bg.jpg') }}" 
+             alt="Nids & Taray Beauty & Wellness Hub" 
+             class="w-full h-full object-cover object-center filter brightness-[0.60] contrast-[1.05] scale-105 transform">
+        <!-- Deep Emerald & Warm Stone Gradient Veil -->
+        <div class="absolute inset-0 bg-gradient-to-t from-stone-950/90 via-emerald-950/75 to-stone-900/80 backdrop-blur-[2px]"></div>
+    </div>
+
+    <!-- Login Card (Glassmorphism / Frosted Card) -->
+    <div class="relative z-10 max-w-md w-full bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl shadow-black/50 border border-white/60 overflow-hidden text-stone-800 my-6">
         
         <!-- Header Banner -->
-        <div class="px-6 pt-8 pb-6 text-center border-b border-emerald-900/10 bg-gradient-to-b from-emerald-50/80 to-white">
+        <div class="px-6 pt-8 pb-6 text-center border-b border-emerald-900/10 bg-gradient-to-b from-emerald-50/90 to-white">
             <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-700 to-teal-600 text-white shadow-md shadow-emerald-700/20 mb-3">
                 <i data-lucide="sparkles" class="w-7 h-7"></i>
             </div>
@@ -33,6 +44,13 @@
                 <div class="p-3 bg-sky-50 border border-sky-200 text-sky-800 text-xs rounded-xl font-medium flex items-center space-x-1.5">
                     <i data-lucide="info" class="w-4 h-4 text-sky-700"></i>
                     <span>{{ session('info') }}</span>
+                </div>
+            @endif
+
+            @if(session('success'))
+                <div class="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl font-medium flex items-center space-x-1.5">
+                    <i data-lucide="check-circle" class="w-4 h-4 text-emerald-700"></i>
+                    <span>{{ session('success') }}</span>
                 </div>
             @endif
 
@@ -70,6 +88,16 @@
                     <i data-lucide="arrow-right" class="w-4 h-4"></i>
                 </button>
             </form>
+
+            <!-- Employee Registration Link -->
+            <div class="text-center pt-2 pb-1">
+                <p class="text-xs text-stone-600">
+                    New staff member? 
+                    <a href="{{ route('register') }}" class="font-bold text-emerald-800 hover:text-emerald-950 underline underline-offset-2 transition">
+                        Register here as Employee
+                    </a>
+                </p>
+            </div>
 
             <!-- Quick Demo Credentials -->
             <div class="pt-4 border-t border-emerald-900/10">

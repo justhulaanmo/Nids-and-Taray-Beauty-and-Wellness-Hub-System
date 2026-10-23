@@ -4,7 +4,13 @@
 <div class="space-y-6">
 
     <!-- Hero / Welcome Banner -->
-    <div class="relative bg-gradient-to-r from-emerald-800 via-teal-800 to-emerald-900 rounded-3xl p-6 sm:p-8 text-white shadow-md shadow-emerald-900/10 overflow-hidden">
+    <div class="relative bg-emerald-950 rounded-3xl p-6 sm:p-8 text-white shadow-md shadow-emerald-900/10 overflow-hidden">
+        <!-- Background Storefront Photo with Emerald Tint -->
+        <div class="absolute inset-0 z-0">
+            <img src="{{ asset('images/nids-and-taray-bg.jpg') }}" alt="Nids and Taray Storefront" class="w-full h-full object-cover object-center opacity-25 filter blur-[0.5px] scale-105">
+            <div class="absolute inset-0 bg-gradient-to-r from-emerald-950/95 via-teal-950/85 to-emerald-900/90"></div>
+        </div>
+
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5 relative z-10">
             <div>
                 <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/15 text-emerald-100 text-xs font-bold uppercase tracking-wider mb-2 border border-white/20">

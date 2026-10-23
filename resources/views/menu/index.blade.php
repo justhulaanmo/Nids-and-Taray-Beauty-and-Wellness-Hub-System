@@ -4,9 +4,16 @@
 <div class="space-y-6">
 
     <!-- Digital Menu Header -->
-    <div class="bg-gradient-to-r from-emerald-800 via-teal-800 to-emerald-900 rounded-3xl p-6 text-white shadow-md shadow-emerald-900/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-            <span class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-white/15 text-emerald-100 text-xs font-bold uppercase tracking-wider mb-1.5 border border-white/20">
+    <div class="relative bg-emerald-950 rounded-3xl p-6 text-white shadow-md shadow-emerald-900/10 overflow-hidden">
+        <!-- Background Storefront Photo with Emerald Tint -->
+        <div class="absolute inset-0 z-0">
+            <img src="{{ asset('images/nids-and-taray-bg.jpg') }}" alt="Nids and Taray Storefront" class="w-full h-full object-cover object-center opacity-25 filter blur-[0.5px] scale-105">
+            <div class="absolute inset-0 bg-gradient-to-r from-emerald-950/95 via-teal-950/85 to-emerald-900/90"></div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 relative z-10">
+            <div>
+                <span class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-white/15 text-emerald-100 text-xs font-bold uppercase tracking-wider mb-1.5 border border-white/20">
                 <i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-200"></i>
                 <span>Service Menu & Price List</span>
             </span>
