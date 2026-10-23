@@ -162,26 +162,3 @@
 
 </div>
 @endsection
-                                </a>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="8" class="p-8 text-center text-xs text-stone-400">
-                                No transactions found matching your filters.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-
-        @if($transactions->hasPages())
-            <div class="p-3 border-t border-stone-100">
-                {{ $transactions->links() }}
-            </div>
-        @endif
-    </div>
-
-</div>
-@endsection

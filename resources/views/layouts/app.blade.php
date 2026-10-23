@@ -41,9 +41,22 @@
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .lucide { stroke-width: 1.75px; vertical-align: middle; }
+        
+        /* Mobile Bottom Nav & Content Spacing across all pages */
+        .mobile-bottom-nav {
+            padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
+        }
+        .app-main-content {
+            padding-bottom: calc(7.5rem + env(safe-area-inset-bottom, 0px));
+        }
+        @media (min-width: 768px) {
+            .app-main-content {
+                padding-bottom: 2.5rem;
+            }
+        }
     </style>
 </head>
-<body class="h-full flex flex-col bg-[#f6f9f6] text-stone-800 antialiased pb-20 md:pb-0">
+<body class="min-h-full flex flex-col bg-[#f6f9f6] text-stone-800 antialiased">
 
     <!-- Top Navigation Header -->
     <header class="bg-white/90 backdrop-blur-md border-b border-emerald-900/10 sticky top-0 z-30 shadow-xs">
@@ -122,7 +135,7 @@
     </header>
 
     <!-- Main Content Area -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5">
+    <main class="app-main-content flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-5 pb-32 md:pb-10">
         <!-- Flash Alerts -->
         @if(session('success'))
             <div class="mb-5 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-start space-x-3 shadow-xs">
@@ -153,10 +166,11 @@
         @endif
 
         @yield('content')
+        <div class="h-4 md:hidden" aria-hidden="true"></div>
     </main>
 
     <!-- Mobile Sticky Bottom Navigation Bar (Phone-friendly) -->
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-emerald-900/10 px-2 py-2 flex justify-around items-center text-center shadow-lg">
+    <nav class="mobile-bottom-nav md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-emerald-900/10 px-2 py-2 flex justify-around items-center text-center shadow-lg">
         <!-- 1. Home / Dashboard -->
         <a href="{{ route('dashboard') }}" class="flex-1 py-1 flex flex-col items-center {{ request()->routeIs('dashboard') ? 'text-emerald-800 font-bold' : 'text-stone-400 hover:text-stone-700' }}">
             <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
