@@ -444,7 +444,7 @@
                             <button type="button" onclick="setCashoutAmount(100)" class="px-2.5 py-1 rounded-lg bg-stone-100 hover:bg-stone-200 text-[10px] font-bold text-stone-700">₱100</button>
                             <button type="button" onclick="setCashoutAmount(500)" class="px-2.5 py-1 rounded-lg bg-stone-100 hover:bg-stone-200 text-[10px] font-bold text-stone-700">₱500</button>
                             <button type="button" onclick="setCashoutAmount(1000)" class="px-2.5 py-1 rounded-lg bg-stone-100 hover:bg-stone-200 text-[10px] font-bold text-stone-700">₱1,000</button>
-                            <button type="button" onclick="setCashoutAmount({{ $availableForCashout }})" class="px-2.5 py-1 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-[10px] font-bold text-emerald-800">Max</button>
+                            <button type="button" onclick="setCashoutMax()" class="px-2.5 py-1 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-[10px] font-bold text-emerald-800">Max</button>
                         </div>
                     </div>
 
@@ -530,6 +530,11 @@
     function setCashoutAmount(amount) {
         const input = document.getElementById('cashout_amount');
         if (input) input.value = amount;
+    }
+
+    function setCashoutMax() {
+        const input = document.getElementById('cashout_amount');
+        if (input && input.max) input.value = input.max;
     }
 
     function toggleBankFields(isBank) {
