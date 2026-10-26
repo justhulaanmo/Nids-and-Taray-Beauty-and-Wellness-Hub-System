@@ -203,6 +203,11 @@
                             <span>Staff Tracker</span>
                             <span class="ml-auto text-[9px] px-1.5 py-0.5 rounded-md font-bold bg-amber-100 text-amber-800">Admin</span>
                         </a>
+                        <a href="{{ route('dashboard') }}" class="flex items-center space-x-2.5 px-3 py-2 rounded-xl transition font-semibold {{ request()->routeIs('dashboard') ? 'bg-emerald-50 text-emerald-900 border border-emerald-200/80 font-bold' : 'text-stone-600 hover:text-emerald-900 hover:bg-stone-50' }}">
+                            <i data-lucide="calculator" class="w-4 h-4 {{ request()->routeIs('dashboard') ? 'text-emerald-700' : 'text-stone-400' }}"></i>
+                            <span>Financials & Net Profit</span>
+                            <span class="ml-auto text-[9px] px-1.5 py-0.5 rounded-md font-bold bg-amber-100 text-amber-800">Admin</span>
+                        </a>
                     @endif
                     <a href="{{ route('wallet.index') }}" class="flex items-center space-x-2.5 px-3 py-2 rounded-xl transition font-semibold {{ request()->routeIs('wallet.*') ? 'bg-emerald-50 text-emerald-900 border border-emerald-200/80 font-bold' : 'text-stone-600 hover:text-emerald-900 hover:bg-stone-50' }}">
                         <i data-lucide="wallet" class="w-4 h-4 {{ request()->routeIs('wallet.*') ? 'text-emerald-700' : 'text-stone-400' }}"></i>

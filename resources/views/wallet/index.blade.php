@@ -3,6 +3,23 @@
 @section('content')
 <div class="max-w-3xl mx-auto space-y-5">
 
+    @if(Auth::user()->role === 'admin')
+        <!-- Admin Notice: Personal Wallet vs Shop Monthly Financials -->
+        <div class="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/90 rounded-2xl p-3.5 shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
+            <div class="flex items-center space-x-2 text-xs">
+                <i data-lucide="info" class="w-4 h-4 text-amber-700 shrink-0"></i>
+                <span class="text-amber-950 font-medium">
+                    <strong class="font-bold text-amber-900">Administrator Notice:</strong>
+                    You are in "My Wallet" (personal attendant earnings). To view salon-wide sales, OPEX bills, and monthly profit reports:
+                </span>
+            </div>
+            <a href="{{ route('dashboard') }}" class="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-black text-xs shadow-xs transition flex items-center space-x-1 shrink-0 self-start sm:self-auto">
+                <span>View Monthly Net Profit</span>
+                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            </a>
+        </div>
+    @endif
+
     <!-- Top Profile & Date Filter -->
     <div class="bg-white rounded-3xl border border-stone-200/90 p-4 sm:p-5 shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
