@@ -14,6 +14,18 @@ class QueueController extends Controller
             ->orderBy('queue_position')
             ->get();
 
+        // Single batch aggregation query for today's served counts
+        $todayServedMap = \App\Models\TransactionItem::whereHas('transaction', function ($q) {
+                $q->whereDate('created_at', \Carbon\Carbon::today())->where('status', '!=', 'cancelled');
+            })
+            ->select('staff_id', \Illuminate\Support\Facades\DB::raw('count(distinct transaction_id) as total'))
+            ->groupBy('staff_id')
+            ->pluck('total', 'staff_id');
+
+        foreach ($allStaff as $staff) {
+            $staff->today_served_count = $todayServedMap[$staff->id] ?? 0;
+        }
+
         $availableQueue = $allStaff->where('status', 'available')->sortBy('queue_position');
         $servingInShop = $allStaff->where('status', 'serving_in_shop');
         $onHomeService = $allStaff->where('status', 'on_home_service');

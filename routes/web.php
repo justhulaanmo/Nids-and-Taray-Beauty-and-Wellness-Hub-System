@@ -46,6 +46,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('transactions', TransactionController::class)->only(['index', 'create', 'store', 'show']);
     Route::patch('/transactions/{id}/mark-paid', [TransactionController::class, 'markPaid'])->name('transactions.mark-paid');
     Route::patch('/transactions/{id}/mark-completed', [TransactionController::class, 'markCompleted'])->name('transactions.mark-completed');
+    Route::patch('/transactions/{id}/payment-method', [TransactionController::class, 'updatePaymentMethod'])->name('transactions.update-payment-method');
 
     // 5. PayMongo Integration & Simulation
     Route::get('/payments/simulate/{transaction_id}', [PayMongoController::class, 'simulate'])->name('paymongo.simulate');

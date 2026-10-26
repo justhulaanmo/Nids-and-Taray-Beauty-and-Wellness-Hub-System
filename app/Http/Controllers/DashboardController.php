@@ -85,6 +85,9 @@ class DashboardController extends Controller
 
         // 6. For Staff Personal View:
         $myPersonalStats = null;
+        $myActiveJob = null;
+        $myQueueTurn = null;
+
         if ($myProfile) {
             $myStaffRecord = $staffProfiles->firstWhere('id', $myProfile->id);
             if ($myStaffRecord) {
@@ -98,12 +101,31 @@ class DashboardController extends Controller
                     'status' => $myProfile->status,
                 ];
             }
+
+            // Find current active/in-progress job for this staff
+            $myActiveJob = TransactionItem::where('staff_id', $myProfile->id)
+                ->whereHas('transaction', function ($q) {
+                    $q->where('status', 'in_progress');
+                })
+                ->with(['transaction', 'service'])
+                ->latest()
+                ->first();
+
+            // Calculate turn number among available staff
+            if ($myProfile->status === 'available') {
+                $queueIndex = $queueAvailable->search(fn($s) => $s->id === $myProfile->id);
+                if ($queueIndex !== false) {
+                    $myQueueTurn = $queueIndex + 1;
+                }
+            }
         }
 
         return view('dashboard.index', compact(
             'isStaff',
             'myProfile',
             'myPersonalStats',
+            'myActiveJob',
+            'myQueueTurn',
             'totalCustomersToday',
             'inShopCustomersToday',
             'homeServiceCustomersToday',

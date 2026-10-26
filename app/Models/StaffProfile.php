@@ -40,10 +40,28 @@ class StaffProfile extends Model
     }
 
     /**
-     * Get count of customers served today
+     * Get count of customers served today (In-memory cached to eliminate N+1 queries)
      */
     public function getCustomersServedTodayAttribute()
     {
+        if (isset($this->today_served_count)) {
+            return $this->today_served_count;
+        }
+        if (isset($this->attributes['today_served_count'])) {
+            return $this->attributes['today_served_count'];
+        }
+        if ($this->relationLoaded('transactionItems')) {
+            $today = Carbon::today()->format('Y-m-d');
+            return $this->transactionItems
+                ->filter(function ($item) use ($today) {
+                    return $item->transaction && 
+                           substr($item->transaction->created_at, 0, 10) === $today &&
+                           $item->transaction->status !== 'cancelled';
+                })
+                ->pluck('transaction_id')
+                ->unique()
+                ->count();
+        }
         return $this->transactionItems()
             ->whereHas('transaction', function ($q) {
                 $q->whereDate('created_at', Carbon::today())

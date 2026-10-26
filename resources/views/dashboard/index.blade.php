@@ -1,171 +1,275 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-4 sm:space-y-6">
 
-    <!-- Hero / Welcome Banner -->
-    <div class="relative bg-emerald-950 rounded-3xl p-6 sm:p-8 text-white shadow-md shadow-emerald-900/10 overflow-hidden">
-        <!-- Background Storefront Photo with Emerald Tint -->
-        <div class="absolute inset-0 z-0">
-            <img src="{{ asset('images/nids-and-taray-bg.jpg') }}" alt="Nids and Taray Storefront" class="w-full h-full object-cover object-center opacity-25 filter blur-[0.5px] scale-105">
-            <div class="absolute inset-0 bg-gradient-to-r from-emerald-950/95 via-teal-950/85 to-emerald-900/90"></div>
-        </div>
-
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5 relative z-10">
-            <div>
-                <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/15 text-emerald-100 text-xs font-bold uppercase tracking-wider mb-2 border border-white/20">
-                    <i data-lucide="calendar" class="w-3.5 h-3.5 text-emerald-200"></i>
-                    <span>Shift Today: {{ now()->format('l, F d, Y') }}</span>
+    <!-- ========================================== -->
+    <!-- STAFF MOBILE-APP HERO CARD (Mobile-First)   -->
+    <!-- ========================================== -->
+    @if($myProfile)
+        <div class="bg-white rounded-3xl border-2 border-emerald-300/90 p-4 sm:p-6 shadow-sm space-y-4">
+            
+            <!-- Staff Profile & Current Status Header -->
+            <div class="flex items-center justify-between border-b border-stone-100 pb-3">
+                <div class="flex items-center space-x-3">
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-700 to-teal-600 text-white font-black text-base flex items-center justify-center shadow-xs">
+                        {{ strtoupper(substr($myProfile->nickname ?? $myProfile->name, 0, 1)) }}
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <h2 class="text-base sm:text-lg font-black text-stone-900 tracking-tight leading-tight">
+                                {{ $myProfile->nickname ?? $myProfile->name }}
+                            </h2>
+                            <span class="text-[10px] px-2 py-0.5 rounded-full font-bold capitalize bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                {{ str_replace('_', ' ', $myProfile->specialization) }}
+                            </span>
+                        </div>
+                        <span class="text-[11px] text-stone-400 block font-medium">
+                            {{ $myProfile->commission_rate }}% commission rate
+                        </span>
+                    </div>
                 </div>
-                <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                    Welcome, {{ Auth::user()->name }}
-                </h1>
-                <p class="text-xs sm:text-sm text-emerald-100/90 mt-1 max-w-xl">
-                    @if(Auth::user()->role === 'admin')
-                        Admin Dashboard &bull; Monitor total sales, staff cash remittance, and service queue in real time.
-                    @else
-                        Staff Portal &bull; Record client orders and view your daily earnings.
-                    @endif
-                </p>
-            </div>
 
-            <!-- Quick Action Buttons -->
-            <div class="flex flex-wrap items-center gap-2.5">
-                <a href="{{ route('transactions.create') }}" class="px-5 py-3 rounded-2xl bg-white text-emerald-900 hover:bg-emerald-50 font-black text-xs sm:text-sm shadow-md transition transform active:scale-95 inline-flex items-center space-x-2">
-                    <i data-lucide="plus" class="w-4 h-4 text-emerald-900"></i>
-                    <span>New Order</span>
-                </a>
-                <a href="{{ route('menu.index') }}" class="px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-xs sm:text-sm transition inline-flex items-center space-x-1.5">
-                    <i data-lucide="sparkles" class="w-4 h-4"></i>
-                    <span>Service Menu</span>
-                </a>
-                <a href="{{ route('wallet.index') }}" class="px-4 py-3 rounded-2xl bg-emerald-600/40 hover:bg-emerald-600/60 border border-white/20 text-emerald-50 font-bold text-xs sm:text-sm transition inline-flex items-center space-x-1.5">
-                    <i data-lucide="wallet" class="w-4 h-4"></i>
-                    <span>My Wallet</span>
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Staff Personal Quick Tally (Visible for Staff & Admin) -->
-    @if($myPersonalStats)
-        <div class="bg-white rounded-3xl p-5 border border-emerald-900/10 shadow-xs space-y-3">
-            <div class="flex items-center justify-between border-b border-stone-100 pb-2">
-                <div class="flex items-center space-x-2">
-                    <i data-lucide="user-check" class="w-4 h-4 text-emerald-800"></i>
-                    <span class="text-xs font-black uppercase tracking-wider text-emerald-900">
-                        My Daily Summary ({{ $myPersonalStats['profile']->nickname ?? $myPersonalStats['profile']->name }})
+                <!-- Live Status Badge -->
+                <div>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-black border {{ $myProfile->status_badge['class'] }}">
+                        <span class="w-2 h-2 rounded-full mr-1.5 {{ $myProfile->status === 'available' ? 'bg-emerald-500 animate-pulse' : 'bg-stone-400' }}"></span>
+                        {{ $myProfile->status_badge['label'] }}
                     </span>
                 </div>
-                <a href="{{ route('wallet.index') }}" class="text-[11px] font-black text-emerald-700 hover:text-emerald-800 hover:underline inline-flex items-center space-x-1">
-                    <span>View Wallet</span>
-                    <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-                </a>
             </div>
 
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-                <div class="p-3.5 rounded-2xl bg-stone-50 border border-stone-200/60">
-                    <span class="block text-2xl font-black text-stone-900">{{ $myPersonalStats['customers_today'] }}</span>
-                    <span class="text-[10px] uppercase font-bold text-stone-500">Clients Served</span>
+            <!-- 1. BIG QUEUE VISIBILITY BANNER -->
+            @if($myProfile->status === 'available')
+                <div class="bg-gradient-to-r from-emerald-600 to-teal-700 rounded-2xl p-4 sm:p-5 text-white shadow-md flex items-center justify-between">
+                    <div class="space-y-0.5">
+                        <span class="text-[10px] sm:text-xs uppercase tracking-wider font-extrabold text-emerald-100 block">
+                            Your Queue Position (Pila)
+                        </span>
+                        <div class="text-2xl sm:text-4xl font-black tracking-tight flex items-center space-x-2">
+                            @if($myQueueTurn === 1)
+                                <span>⭐ YOU ARE #1 (NEXT UP!)</span>
+                            @elseif($myQueueTurn)
+                                <span>YOU ARE #{{ $myQueueTurn }} IN LINE</span>
+                            @else
+                                <span>READY TO SERVE</span>
+                            @endif
+                        </div>
+                        <p class="text-[11px] text-emerald-100 font-medium">
+                            {{ $myQueueTurn === 1 ? 'Get ready! You will be assigned the next incoming client.' : 'Clients are assigned in fair rotation order.' }}
+                        </p>
+                    </div>
+                    <div class="w-14 h-14 rounded-2xl bg-white/15 border border-white/20 flex flex-col items-center justify-center text-white flex-shrink-0">
+                        <span class="text-[9px] uppercase font-bold text-emerald-200">Turn</span>
+                        <span class="text-2xl font-black">#{{ $myQueueTurn ?? 1 }}</span>
+                    </div>
                 </div>
-                <div class="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200/70">
-                    <span class="block text-2xl font-black text-emerald-800">₱{{ number_format($myPersonalStats['commission_today'], 2) }}</span>
-                    <span class="text-[10px] uppercase font-bold text-emerald-700">My Commission</span>
+            @elseif($myProfile->status === 'serving_in_shop' || $myProfile->status === 'on_home_service')
+                <div class="bg-gradient-to-r from-teal-700 to-cyan-800 rounded-2xl p-4 sm:p-5 text-white shadow-md flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] uppercase tracking-wider font-extrabold text-teal-200 block">Current Status</span>
+                        <div class="text-xl sm:text-2xl font-black tracking-tight flex items-center space-x-2 mt-0.5">
+                            <i data-lucide="{{ $myProfile->status === 'on_home_service' ? 'home' : 'store' }}" class="w-5 h-5"></i>
+                            <span>{{ $myProfile->status === 'on_home_service' ? 'OUT ON HOME SERVICE' : 'SERVING CLIENT IN-SHOP' }}</span>
+                        </div>
+                        <p class="text-[11px] text-teal-100 mt-0.5">Finish client service below to return to the available queue.</p>
+                    </div>
                 </div>
-                <div class="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/70">
-                    <span class="block text-2xl font-black text-amber-900">₱{{ number_format($myPersonalStats['cash_collected'], 2) }}</span>
-                    <span class="text-[10px] uppercase font-bold text-amber-700">Cash Collected</span>
+            @elseif($myProfile->status === 'on_break')
+                <div class="bg-gradient-to-r from-amber-600 to-amber-700 rounded-2xl p-4 text-white shadow-md flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] uppercase tracking-wider font-extrabold text-amber-100 block">Rest Period</span>
+                        <div class="text-xl font-black tracking-tight flex items-center space-x-2 mt-0.5">
+                            <i data-lucide="coffee" class="w-5 h-5"></i>
+                            <span>YOU ARE CURRENTLY ON BREAK</span>
+                        </div>
+                        <p class="text-[11px] text-amber-100 mt-0.5">Tap below when you are ready to rejoin the available queue.</p>
+                    </div>
                 </div>
-                <div class="p-3.5 rounded-2xl bg-teal-50/70 border border-teal-200/70">
-                    <span class="block text-2xl font-black text-teal-900">₱{{ number_format($myPersonalStats['cash_to_remit'], 2) }}</span>
-                    <span class="text-[10px] uppercase font-bold text-teal-700">Cash Due to Shop</span>
+            @endif
+
+            <!-- 2. ACTIVE JOB ALERT (If staff is assigned to an active order) -->
+            @if($myActiveJob)
+                <div class="bg-teal-50 border-2 border-teal-300 rounded-2xl p-4 sm:p-5 shadow-xs space-y-3">
+                    <div class="flex items-center justify-between border-b border-teal-200/80 pb-2.5">
+                        <div class="flex items-center space-x-2 text-teal-950 font-black text-xs sm:text-sm">
+                            <span class="w-2.5 h-2.5 rounded-full bg-teal-600 animate-ping"></span>
+                            <span>ACTIVE CLIENT ASSIGNMENT</span>
+                        </div>
+                        <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-teal-100 text-teal-800 border border-teal-200">
+                            {{ $myActiveJob->transaction->tracking_number ?? 'Order' }}
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                        <div>
+                            <span class="text-stone-500 text-[11px] block">Client Name:</span>
+                            <span class="font-black text-stone-900 text-sm sm:text-base block">
+                                {{ $myActiveJob->transaction->customer_name }}
+                            </span>
+                            @if($myActiveJob->transaction->customer_phone)
+                                <span class="text-stone-500 text-[11px]">{{ $myActiveJob->transaction->customer_phone }}</span>
+                            @endif
+                        </div>
+
+                        <div>
+                            <span class="text-stone-500 text-[11px] block">Service Treatment:</span>
+                            <span class="font-extrabold text-teal-900 text-sm block">
+                                {{ $myActiveJob->service->name ?? 'Treatment' }}
+                            </span>
+                            <span class="text-emerald-800 font-bold text-[11px]">
+                                Your Commission: ₱{{ number_format($myActiveJob->staff_commission_amount, 2) }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Prominent Complete & Return to Queue Button -->
+                    <form action="{{ route('transactions.mark-completed', $myActiveJob->transaction_id) }}" method="POST" class="pt-1">
+                        @csrf
+                        @method('PATCH')
+                        <button type="submit" class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-emerald-700 to-teal-700 hover:from-emerald-800 hover:to-teal-800 text-white font-black text-xs sm:text-sm shadow-md transition-all active:scale-[0.98] flex items-center justify-center space-x-2">
+                            <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+                            <span>MARK AS DONE &bull; RETURN TO QUEUE</span>
+                        </button>
+                    </form>
                 </div>
+            @endif
+
+            <!-- 3. PROMINENT ONE-TAP STATUS CONTROLS (Available vs On Break) -->
+            <div class="pt-1">
+                <span class="text-[10px] font-extrabold uppercase tracking-wider text-stone-400 block mb-2">
+                    Quick Status Toggle
+                </span>
+                
+                @if($myProfile->status === 'available')
+                    <form action="{{ route('queue.update-status', $myProfile->id) }}" method="POST">
+                        @csrf
+                        @method('PATCH')
+                        <input type="hidden" name="status" value="on_break">
+                        <button type="submit" class="w-full py-3.5 px-4 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border-2 border-amber-300 font-black text-xs sm:text-sm shadow-2xs transition flex items-center justify-center space-x-2 active:scale-[0.98]">
+                            <i data-lucide="coffee" class="w-4 h-4 text-amber-700"></i>
+                            <span>TAKE A BREAK (PAHINGA MUNA)</span>
+                        </button>
+                    </form>
+                @else
+                    <form action="{{ route('queue.update-status', $myProfile->id) }}" method="POST">
+                        @csrf
+                        @method('PATCH')
+                        <input type="hidden" name="status" value="available">
+                        <button type="submit" class="w-full py-3.5 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white border-2 border-emerald-600 font-black text-xs sm:text-sm shadow-md transition flex items-center justify-center space-x-2 active:scale-[0.98]">
+                            <i data-lucide="check" class="w-4 h-4"></i>
+                            <span>I AM READY &bull; SET TO AVAILABLE (PILA NA)</span>
+                        </button>
+                    </form>
+                @endif
             </div>
+
+            <!-- 4. Staff Daily Earnings Overview (Large Tap-Friendly Cards) -->
+            @if($myPersonalStats)
+                <div class="grid grid-cols-2 gap-2.5 pt-2">
+                    <a href="{{ route('wallet.index') }}" class="p-3.5 rounded-2xl bg-emerald-50/70 border border-emerald-200 text-center hover:bg-emerald-100/60 transition block">
+                        <span class="text-xs uppercase font-extrabold text-emerald-800 block">Today's Earnings</span>
+                        <span class="text-xl sm:text-2xl font-black text-emerald-900 block mt-0.5">
+                            ₱{{ number_format($myPersonalStats['commission_today'], 2) }}
+                        </span>
+                        <span class="text-[10px] text-emerald-700 font-medium">Tap to see wallet &rarr;</span>
+                    </a>
+
+                    <div class="p-3.5 rounded-2xl bg-stone-50 border border-stone-200 text-center">
+                        <span class="text-xs uppercase font-extrabold text-stone-500 block">Clients Served</span>
+                        <span class="text-xl sm:text-2xl font-black text-stone-900 block mt-0.5">
+                            {{ $myPersonalStats['customers_today'] }}
+                        </span>
+                        <span class="text-[10px] text-stone-500 font-medium">Completed today</span>
+                    </div>
+                </div>
+            @endif
+
         </div>
     @endif
 
-    <!-- Admin Overview: Shop Financials & Remittance Tally -->
+    <!-- ========================================== -->
+    <!-- ADMIN OVERVIEW SECTION (Financials & Queue)-->
+    <!-- ========================================== -->
     @if(Auth::user()->role === 'admin')
-        <!-- Financial Summary -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div class="bg-white rounded-2xl p-4 border border-emerald-900/10 shadow-xs">
-                <span class="text-[10px] font-black uppercase tracking-wider text-stone-500 block">Today's Clients</span>
-                <span class="text-3xl font-black text-stone-900 block mt-1">{{ $totalCustomersToday }}</span>
-                <span class="text-[11px] text-stone-500 block mt-0.5">{{ $inShopCustomersToday }} In-Shop &bull; {{ $homeServiceCustomersToday }} Home Service</span>
+        <!-- Store / Daily Metrics -->
+        <div class="bg-white rounded-3xl border border-stone-200/80 p-4 sm:p-5 shadow-2xs space-y-3">
+            <div class="flex items-center justify-between border-b border-stone-100 pb-2">
+                <h3 class="text-xs font-black uppercase tracking-wider text-stone-800 flex items-center space-x-2">
+                    <i data-lucide="store" class="w-4 h-4 text-emerald-800"></i>
+                    <span>Shop Operations Overview (Admin)</span>
+                </h3>
+                <span class="text-[11px] font-bold text-stone-400">{{ now()->format('M d, Y') }}</span>
             </div>
 
-            <div class="bg-white rounded-2xl p-4 border border-emerald-200 bg-gradient-to-br from-white to-emerald-50/50 shadow-xs">
-                <span class="text-[10px] font-black uppercase tracking-wider text-emerald-700 block">Total Sales</span>
-                <span class="text-2xl sm:text-3xl font-black text-emerald-800 block mt-1">₱{{ number_format($totalSalesToday, 2) }}</span>
-                <span class="text-[10px] text-stone-500 block mt-0.5">Paid transactions</span>
-            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                <div class="p-3 bg-stone-50 rounded-2xl border border-stone-200/70 text-center">
+                    <span class="text-[10px] font-bold uppercase text-stone-500 block">Total Clients</span>
+                    <span class="text-xl sm:text-2xl font-black text-stone-900 block mt-0.5">{{ $totalCustomersToday }}</span>
+                    <span class="text-[9px] text-stone-400 block">{{ $inShopCustomersToday }} Salon &bull; {{ $homeServiceCustomersToday }} Home</span>
+                </div>
 
-            <div class="bg-white rounded-2xl p-4 border border-amber-200 bg-gradient-to-br from-white to-amber-50/50 shadow-xs">
-                <span class="text-[10px] font-black uppercase tracking-wider text-amber-700 block">Cash Sales</span>
-                <span class="text-2xl sm:text-3xl font-black text-amber-800 block mt-1">₱{{ number_format($cashSalesToday, 2) }}</span>
-                <span class="text-[10px] text-stone-500 block mt-0.5">Collected by staff</span>
-            </div>
+                <div class="p-3 bg-emerald-50/60 rounded-2xl border border-emerald-200 text-center">
+                    <span class="text-[10px] font-bold uppercase text-emerald-800 block">Total Sales</span>
+                    <span class="text-xl sm:text-2xl font-black text-emerald-900 block mt-0.5">₱{{ number_format($totalSalesToday, 2) }}</span>
+                    <span class="text-[9px] text-emerald-700 block">Paid Orders</span>
+                </div>
 
-            <div class="bg-white rounded-2xl p-4 border border-sky-200 bg-gradient-to-br from-white to-sky-50/50 shadow-xs">
-                <span class="text-[10px] font-black uppercase tracking-wider text-sky-700 block">PayMongo QR</span>
-                <span class="text-2xl sm:text-3xl font-black text-sky-800 block mt-1">₱{{ number_format($qrSalesToday, 2) }}</span>
-                <span class="text-[10px] text-stone-500 block mt-0.5">GCash / Maya account</span>
+                <div class="p-3 bg-amber-50/60 rounded-2xl border border-amber-200 text-center">
+                    <span class="text-[10px] font-bold uppercase text-amber-800 block">Cash Sales</span>
+                    <span class="text-xl sm:text-2xl font-black text-amber-900 block mt-0.5">₱{{ number_format($cashSalesToday, 2) }}</span>
+                    <span class="text-[9px] text-amber-700 block">On-hand cash</span>
+                </div>
+
+                <div class="p-3 bg-indigo-50/60 rounded-2xl border border-indigo-200 text-center">
+                    <span class="text-[10px] font-bold uppercase text-indigo-800 block">PayMongo QR</span>
+                    <span class="text-xl sm:text-2xl font-black text-indigo-900 block mt-0.5">₱{{ number_format($qrSalesToday, 2) }}</span>
+                    <span class="text-[9px] text-indigo-700 block">GCash / Maya</span>
+                </div>
             </div>
         </div>
 
-        <!-- Remittance Tally Table (What each staff remits to Shop) -->
-        <div class="bg-white rounded-3xl border border-emerald-900/10 shadow-xs p-5 space-y-4">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-stone-100 pb-3">
-                <div>
-                    <h2 class="text-sm sm:text-base font-black text-stone-900 flex items-center space-x-2">
-                        <i data-lucide="banknote" class="w-4 h-4 text-emerald-800"></i>
-                        <span>Staff Cash Remittance Summary</span>
-                    </h2>
-                    <p class="text-xs text-stone-500">
-                        Summary of cash to be turned in to the shop by each staff member at the end of the shift.
-                    </p>
-                </div>
-                <a href="{{ route('services.manage') }}" class="text-xs font-bold text-emerald-700 hover:text-emerald-800 inline-flex items-center space-x-1">
-                    <i data-lucide="sliders" class="w-3.5 h-3.5"></i>
-                    <span>Price Setter</span>
+        <!-- Staff Remittance Summary Table (Compact) -->
+        <div class="bg-white rounded-3xl border border-stone-200/80 p-4 sm:p-5 shadow-2xs space-y-3">
+            <div class="flex items-center justify-between border-b border-stone-100 pb-2">
+                <h3 class="text-xs font-black uppercase tracking-wider text-stone-800 flex items-center space-x-2">
+                    <i data-lucide="banknote" class="w-4 h-4 text-emerald-800"></i>
+                    <span>Staff Remittance Due to Shop</span>
+                </h3>
+                <a href="{{ route('staff-tracker.index') }}" class="text-[11px] font-bold text-emerald-700 hover:underline">
+                    View Tracker &rarr;
                 </a>
             </div>
 
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-xs">
                     <thead>
-                        <tr class="bg-stone-50 text-stone-600 font-bold uppercase border-b border-stone-200">
-                            <th class="py-2.5 px-3">Staff Member</th>
-                            <th class="py-2.5 px-3 text-center">Clients Served</th>
-                            <th class="py-2.5 px-3 text-right">Cash Collected</th>
-                            <th class="py-2.5 px-3 text-right">Commission Earned</th>
-                            <th class="py-2.5 px-3 text-right">Cash Due to Shop</th>
-                            <th class="py-2.5 px-3 text-center">Status</th>
+                        <tr class="border-b border-stone-200 bg-stone-50/50 text-[10px] font-bold text-stone-500 uppercase">
+                            <th class="py-2 px-2.5">Staff</th>
+                            <th class="py-2 px-2.5 text-center">Clients</th>
+                            <th class="py-2 px-2.5 text-right">Cash In Hand</th>
+                            <th class="py-2 px-2.5 text-right">Due to Shop</th>
+                            <th class="py-2 px-2.5 text-center">Status</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-stone-100">
                         @foreach($staffProfiles as $staff)
-                            <tr class="hover:bg-emerald-50/40 transition">
-                                <td class="py-3 px-3">
-                                    <span class="font-extrabold text-stone-900 text-sm block">{{ $staff->nickname ?? $staff->name }}</span>
-                                    <span class="text-[11px] text-stone-500">{{ $staff->name }} ({{ $staff->commission_rate }}%)</span>
+                            <tr class="hover:bg-stone-50/50">
+                                <td class="py-2.5 px-2.5">
+                                    <span class="font-extrabold text-stone-900 block text-xs">{{ $staff->nickname ?? $staff->name }}</span>
+                                    <span class="text-[10px] text-stone-400 capitalize">{{ str_replace('_', ' ', $staff->specialization) }}</span>
                                 </td>
-                                <td class="py-3 px-3 text-center">
-                                    <span class="inline-flex items-center justify-center px-2.5 py-1 rounded-full text-xs font-black {{ $staff->customers_count > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-stone-100 text-stone-400' }}">
-                                        {{ $staff->customers_count }}
-                                    </span>
+                                <td class="py-2.5 px-2.5 text-center font-bold text-stone-800">
+                                    {{ $staff->customers_count }}
                                 </td>
-                                <td class="py-3 px-3 text-right font-bold text-amber-800">
+                                <td class="py-2.5 px-2.5 text-right font-bold text-amber-800">
                                     ₱{{ number_format($staff->cash_collected, 2) }}
                                 </td>
-                                <td class="py-3 px-3 text-right font-bold text-emerald-700">
-                                    ₱{{ number_format($staff->commission_total, 2) }}
-                                </td>
-                                <td class="py-3 px-3 text-right font-black text-teal-800 text-sm">
+                                <td class="py-2.5 px-2.5 text-right font-black text-emerald-800">
                                     ₱{{ number_format($staff->cash_to_remit, 2) }}
                                 </td>
-                                <td class="py-3 px-3 text-center">
-                                    <span class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold border {{ $staff->status_badge['class'] }}">
+                                <td class="py-2.5 px-2.5 text-center">
+                                    <span class="inline-block px-2 py-0.5 rounded-full text-[9px] font-bold border {{ $staff->status_badge['class'] }}">
                                         {{ $staff->status_badge['label'] }}
                                     </span>
                                 </td>
@@ -177,54 +281,40 @@
         </div>
     @endif
 
-    <!-- Live Queue Snapshot Section (Important for both Admin and Staff) -->
-    <div class="bg-white rounded-3xl border border-emerald-900/10 shadow-xs p-5 space-y-4">
-        <div class="border-b border-stone-100 pb-3 space-y-2">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-2.5">
-                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse flex-shrink-0"></span>
-                    <h2 class="text-sm sm:text-base font-black text-stone-900 flex items-center space-x-1.5">
-                        <i data-lucide="users" class="w-4 h-4 text-emerald-800"></i>
-                        <span>Available Staff in Queue</span>
-                    </h2>
-                </div>
-                <a href="{{ route('queue.index') }}" class="text-xs font-bold text-emerald-700 hover:text-emerald-800 inline-flex items-center space-x-1 flex-shrink-0">
-                    <span>Queue Board</span>
-                    <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
-                </a>
+    <!-- Available Queue Strip -->
+    <div class="bg-white rounded-3xl border border-stone-200/80 p-4 sm:p-5 shadow-2xs space-y-3">
+        <div class="flex items-center justify-between border-b border-stone-100 pb-2">
+            <div class="flex items-center space-x-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <h3 class="text-xs font-black uppercase tracking-wider text-stone-800">
+                    Live Available Queue ({{ $queueAvailable->count() }})
+                </h3>
             </div>
-            <div class="flex items-center pl-5">
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 whitespace-nowrap">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 mr-1.5"></span>
-                    {{ $queueAvailable->count() }} Available
-                </span>
-            </div>
+            <a href="{{ route('queue.index') }}" class="text-[11px] font-bold text-emerald-700 hover:underline">
+                Full Queue Board &rarr;
+            </a>
         </div>
 
-        @if($queueAvailable->isEmpty())
-            <div class="p-6 text-center text-xs text-stone-500 bg-stone-50 rounded-2xl border border-stone-200/50">
-                No staff currently available in queue. All staff are busy with clients, on home service, or on break.
-            </div>
-        @else
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                @foreach($queueAvailable as $staff)
-                    <div class="p-3.5 rounded-2xl bg-stone-50 border border-stone-200/70 flex items-center justify-between hover:border-emerald-300 hover:bg-emerald-50/40 transition">
-                        <div class="flex items-center space-x-3">
-                            <span class="w-7 h-7 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-black text-xs">
-                                #{{ $loop->iteration }}
-                            </span>
-                            <div>
-                                <span class="font-extrabold text-stone-900 text-sm block">{{ $staff->nickname ?? $staff->name }}</span>
-                                <span class="text-[10px] text-stone-500 capitalize">{{ str_replace('_', ' ', $staff->specialization) }}</span>
-                            </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            @forelse($queueAvailable as $staff)
+                <div class="p-2.5 rounded-xl bg-stone-50 border border-stone-200/70 flex items-center justify-between text-xs hover:bg-emerald-50/30 transition">
+                    <div class="flex items-center space-x-2.5 min-w-0">
+                        <span class="w-6 h-6 rounded-lg bg-emerald-700 text-white font-black text-xs flex items-center justify-center flex-shrink-0">
+                            #{{ $loop->iteration }}
+                        </span>
+                        <div class="truncate">
+                            <span class="font-extrabold text-stone-900 block truncate text-xs">{{ $staff->nickname ?? $staff->name }}</span>
+                            <span class="text-[10px] text-stone-400 capitalize">{{ str_replace('_', ' ', $staff->specialization) }}</span>
                         </div>
-                        <a href="{{ route('transactions.create') }}" class="px-3.5 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-xs transition">
-                            Assign
-                        </a>
                     </div>
-                @endforeach
-            </div>
-        @endif
+                    <span class="text-[10px] px-2 py-0.5 rounded-md font-bold bg-emerald-100 text-emerald-800">Ready</span>
+                </div>
+            @empty
+                <div class="p-3 text-center text-xs text-stone-400 col-span-3">
+                    No staff currently waiting in queue.
+                </div>
+            @endforelse
+        </div>
     </div>
 
 </div>

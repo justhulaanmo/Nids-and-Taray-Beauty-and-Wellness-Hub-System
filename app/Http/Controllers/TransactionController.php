@@ -187,15 +187,55 @@ class TransactionController extends Controller
     public function markPaid(Request $request, $id)
     {
         $transaction = Transaction::findOrFail($id);
+        $method = $request->input('payment_method', $transaction->payment_method);
+        $ref = $request->input('payment_reference') ?? (($method === 'cash') ? 'CASH-' . strtoupper(uniqid()) : 'QR-' . strtoupper(uniqid()));
 
         $transaction->update([
             'payment_status' => 'paid',
-            'payment_method' => $request->input('payment_method', $transaction->payment_method),
-            'payment_reference' => $request->input('payment_reference') ?? 'CASH-' . strtoupper(uniqid()),
+            'payment_method' => $method,
+            'payment_reference' => $ref,
             'completed_at' => now(),
         ]);
 
-        return back()->with('success', "Transaction #{$transaction->tracking_number} marked as Paid!");
+        $label = ($method === 'paymongo_qr') ? 'PayMongo QR' : 'Cash';
+        return back()->with('success', "Transaction #{$transaction->tracking_number} marked as Paid via {$label}!");
+    }
+
+    public function updatePaymentMethod(Request $request, $id, PayMongoService $payMongo)
+    {
+        $request->validate([
+            'payment_method' => 'required|in:cash,paymongo_qr',
+        ]);
+
+        $transaction = Transaction::with(['items.service'])->findOrFail($id);
+        $newMethod = $request->input('payment_method');
+
+        $checkoutUrl = $transaction->paymongo_checkout_url;
+        $checkoutId = $transaction->paymongo_checkout_id;
+
+        if ($newMethod === 'paymongo_qr' && empty($checkoutUrl)) {
+            $payResult = $payMongo->createCheckoutSession([
+                'transaction_id' => $transaction->id,
+                'tracking_number' => $transaction->tracking_number,
+                'items' => $transaction->items->map(fn($i) => ['name' => $i->service->name ?? 'Service', 'price' => $i->price])->toArray(),
+                'home_service_fee' => $transaction->home_service_fee,
+            ]);
+
+            if ($payResult['success']) {
+                $checkoutId = $payResult['checkout_id'];
+                $checkoutUrl = $payResult['checkout_url'];
+            }
+        }
+
+        $transaction->update([
+            'payment_method' => $newMethod,
+            'paymongo_checkout_id' => $checkoutId,
+            'paymongo_checkout_url' => $checkoutUrl,
+        ]);
+
+        $methodLabel = ($newMethod === 'paymongo_qr') ? 'PayMongo QR (GCash / Maya)' : 'Cash';
+
+        return back()->with('success', "Payment method updated to {$methodLabel}.");
     }
 
     public function markCompleted($id)
@@ -207,15 +247,19 @@ class TransactionController extends Controller
             'completed_at' => now(),
         ]);
 
-        // Release staff back to available queue
+        // Release staff back to available queue (1-query batch optimization)
+        $maxQueue = StaffProfile::where('status', 'available')->max('queue_position') ?? 0;
+        $requeuedStaffIds = [];
+
         foreach ($transaction->items as $item) {
-            if ($item->staff && in_array($item->staff->status, ['serving_in_shop', 'on_home_service'])) {
-                $maxQueue = StaffProfile::where('status', 'available')->max('queue_position') ?? 0;
+            if ($item->staff && !in_array($item->staff->id, $requeuedStaffIds)) {
+                $maxQueue++;
                 $item->staff->update([
                     'status' => 'available',
-                    'queue_position' => $maxQueue + 1,
+                    'queue_position' => $maxQueue,
                     'last_status_change' => now(),
                 ]);
+                $requeuedStaffIds[] = $item->staff->id;
             }
         }
 

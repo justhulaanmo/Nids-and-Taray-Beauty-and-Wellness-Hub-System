@@ -140,45 +140,90 @@
                 </div>
             </div>
 
-            <!-- Payment Status Box -->
-            <div class="p-4 rounded-2xl border {{ $transaction->payment_status === 'paid' ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-amber-50 border-amber-200 text-amber-900' }} flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs">
-                <div>
-                    <div class="font-black uppercase tracking-wider text-xs flex items-center space-x-1.5 {{ $transaction->payment_status === 'paid' ? 'text-emerald-800' : 'text-amber-800' }}">
-                        @if($transaction->payment_status === 'paid')
-                            <i data-lucide="check-circle" class="w-4 h-4 text-emerald-700"></i>
-                            <span>PAID</span>
-                        @else
-                            <i data-lucide="clock" class="w-4 h-4 text-amber-700"></i>
-                            <span>UNPAID (PENDING)</span>
-                        @endif
+            <!-- Payment Status & Mode of Payment Switcher Box -->
+            <div class="p-4 sm:p-5 rounded-2xl border {{ $transaction->payment_status === 'paid' ? 'bg-emerald-50 border-emerald-200 text-emerald-950' : 'bg-amber-50 border-amber-200 text-amber-950' }} space-y-3.5 text-xs">
+                
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div>
+                        <div class="font-black uppercase tracking-wider text-xs flex items-center space-x-1.5 {{ $transaction->payment_status === 'paid' ? 'text-emerald-800' : 'text-amber-800' }}">
+                            @if($transaction->payment_status === 'paid')
+                                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-700"></i>
+                                <span>PAID &bull; RECEIPT CONFIRMED</span>
+                            @else
+                                <i data-lucide="clock" class="w-4 h-4 text-amber-700"></i>
+                                <span>UNPAID &bull; PENDING PAYMENT</span>
+                            @endif
+                        </div>
+                        <div class="text-[11px] text-stone-600 mt-1 flex flex-wrap items-center gap-1.5">
+                            <span>Payment Method:</span>
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-md font-extrabold text-[11px] {{ $transaction->payment_method === 'paymongo_qr' ? 'bg-indigo-100 text-indigo-900 border border-indigo-200' : 'bg-amber-100 text-amber-900 border border-amber-200' }}">
+                                <i data-lucide="{{ $transaction->payment_method === 'paymongo_qr' ? 'qr-code' : 'banknote' }}" class="w-3 h-3 mr-1"></i>
+                                {{ $transaction->payment_method === 'paymongo_qr' ? 'PayMongo QR (GCash / Maya / QRPh)' : 'Cash Payment' }}
+                            </span>
+                            @if($transaction->payment_reference)
+                                <span>&bull; Ref: <code class="font-mono bg-white px-1.5 py-0.5 rounded border border-stone-200 text-stone-800 font-bold">{{ $transaction->payment_reference }}</code></span>
+                            @endif
+                        </div>
                     </div>
-                    <div class="text-[11px] text-stone-600 mt-0.5">
-                        Payment Method: <strong>{{ $transaction->payment_method === 'paymongo_qr' ? 'PayMongo QR' : 'Cash' }}</strong>
-                        @if($transaction->payment_reference)
-                            &bull; Ref: <code class="font-mono bg-white px-1.5 py-0.5 rounded border border-stone-200 text-stone-800 font-bold">{{ $transaction->payment_reference }}</code>
-                        @endif
-                    </div>
-                </div>
 
-                <div class="no-print flex items-center space-x-2">
-                    @if($transaction->payment_status !== 'paid')
-                        @if($transaction->payment_method === 'paymongo_qr')
-                            <a href="{{ $transaction->paymongo_checkout_url ?? route('paymongo.simulate', $transaction->id) }}" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs shadow-xs transition inline-flex items-center space-x-1.5">
-                                <i data-lucide="qr-code" class="w-3.5 h-3.5"></i>
-                                <span>Open QR Checkout</span>
-                            </a>
-                        @endif
-
-                        <form action="{{ route('transactions.mark-paid', $transaction->id) }}" method="POST">
+                    <!-- Mode of Payment Switcher (Customer Changed Mind) -->
+                    <div class="no-print flex items-center space-x-1.5">
+                        <form action="{{ route('transactions.update-payment-method', $transaction->id) }}" method="POST" class="inline">
                             @csrf
                             @method('PATCH')
-                            <button type="submit" class="px-3.5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl text-xs shadow-xs transition inline-flex items-center space-x-1.5">
-                                <i data-lucide="banknote" class="w-3.5 h-3.5"></i>
-                                <span>Mark as Paid</span>
-                            </button>
+                            @if($transaction->payment_method === 'cash')
+                                <input type="hidden" name="payment_method" value="paymongo_qr">
+                                <button type="submit" class="px-2.5 py-1.5 rounded-xl bg-white hover:bg-indigo-50 text-indigo-700 hover:text-indigo-900 border border-indigo-200 font-bold text-[11px] shadow-2xs transition inline-flex items-center space-x-1">
+                                    <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+                                    <span>Switch to QR (GCash/Maya)</span>
+                                </button>
+                            @else
+                                <input type="hidden" name="payment_method" value="cash">
+                                <button type="submit" class="px-2.5 py-1.5 rounded-xl bg-white hover:bg-amber-50 text-amber-800 hover:text-amber-950 border border-amber-200 font-bold text-[11px] shadow-2xs transition inline-flex items-center space-x-1">
+                                    <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+                                    <span>Switch to Cash</span>
+                                </button>
+                            @endif
                         </form>
-                    @endif
+                    </div>
                 </div>
+
+                <!-- Payment Actions (Unpaid) -->
+                @if($transaction->payment_status !== 'paid')
+                    <div class="no-print pt-2.5 border-t border-amber-200/80 flex flex-wrap items-center justify-between gap-2.5">
+                        <div class="flex items-center space-x-2">
+                            @if($transaction->payment_method === 'paymongo_qr')
+                                <a href="{{ $transaction->paymongo_checkout_url ?? route('paymongo.simulate', $transaction->id) }}" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs shadow-xs transition inline-flex items-center space-x-1.5">
+                                    <i data-lucide="qr-code" class="w-4 h-4"></i>
+                                    <span>Open QR Code / Checkout</span>
+                                </a>
+                            @endif
+                        </div>
+
+                        <!-- Mark as Paid Buttons (Choose Cash or QR directly) -->
+                        <div class="flex items-center space-x-2 ml-auto">
+                            <form action="{{ route('transactions.mark-paid', $transaction->id) }}" method="POST" class="inline">
+                                @csrf
+                                @method('PATCH')
+                                <input type="hidden" name="payment_method" value="cash">
+                                <button type="submit" class="px-3.5 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl text-xs shadow-xs transition inline-flex items-center space-x-1.5">
+                                    <i data-lucide="banknote" class="w-3.5 h-3.5"></i>
+                                    <span>Mark Paid (Cash)</span>
+                                </button>
+                            </form>
+
+                            <form action="{{ route('transactions.mark-paid', $transaction->id) }}" method="POST" class="inline">
+                                @csrf
+                                @method('PATCH')
+                                <input type="hidden" name="payment_method" value="paymongo_qr">
+                                <button type="submit" class="px-3.5 py-2 bg-indigo-700 hover:bg-indigo-800 text-white font-bold rounded-xl text-xs shadow-xs transition inline-flex items-center space-x-1.5">
+                                    <i data-lucide="qr-code" class="w-3.5 h-3.5"></i>
+                                    <span>Mark Paid (QR)</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                @endif
             </div>
 
             <!-- SOP Step: Clean & Sanitize Equipment / Release Staff -->
