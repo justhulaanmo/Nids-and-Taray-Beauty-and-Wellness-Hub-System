@@ -1,242 +1,399 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-4">
 
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <!-- Top Header & At-a-Glance Stat Pills -->
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
         <div>
-            <h1 class="text-xl sm:text-2xl font-black text-stone-900 tracking-tight flex items-center space-x-2">
-                <i data-lucide="users" class="w-6 h-6 text-emerald-800"></i>
-                <span>Queue Board & Staff Availability</span>
+            <h1 class="text-lg sm:text-xl font-black text-stone-900 tracking-tight flex items-center space-x-2">
+                <i data-lucide="users" class="w-5 h-5 text-emerald-800"></i>
+                <span>Queue Board & Staff Roster</span>
             </h1>
-            <p class="text-xs text-stone-500 mt-0.5">
-                Fair rotation queue: next staff in line, current service assignments, and availability.
+            <p class="text-[11px] text-stone-500">
+                Live rotation queue, attendant assignments, and one-tap status switcher.
             </p>
         </div>
-        <div class="flex items-center space-x-2">
-            <a href="{{ route('transactions.create') }}" class="px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs transition inline-flex items-center space-x-1.5">
-                <i data-lucide="plus" class="w-4 h-4"></i>
-                <span>New Order</span>
-            </a>
+
+        <!-- High-Density Quick Counters Strip -->
+        <div class="flex flex-wrap items-center gap-1.5 text-[11px]">
+            <span class="inline-flex items-center px-2.5 py-1 rounded-lg font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
+                <strong>{{ $availableQueue->count() }}</strong>&nbsp;Ready
+            </span>
+            <span class="inline-flex items-center px-2.5 py-1 rounded-lg font-bold bg-teal-50 text-teal-800 border border-teal-200 shadow-2xs">
+                <span class="w-2 h-2 rounded-full bg-teal-500 mr-1.5"></span>
+                <strong>{{ $servingInShop->count() }}</strong>&nbsp;In-Shop
+            </span>
+            <span class="inline-flex items-center px-2.5 py-1 rounded-lg font-bold bg-sky-50 text-sky-800 border border-sky-200 shadow-2xs">
+                <span class="w-2 h-2 rounded-full bg-sky-500 mr-1.5"></span>
+                <strong>{{ $onHomeService->count() }}</strong>&nbsp;Home Svc
+            </span>
+            <span class="inline-flex items-center px-2.5 py-1 rounded-lg font-bold bg-amber-50 text-amber-800 border border-amber-200 shadow-2xs">
+                <span class="w-2 h-2 rounded-full bg-amber-500 mr-1.5"></span>
+                <strong>{{ $onBreak->count() }}</strong>&nbsp;Break
+            </span>
+            @if($offDuty->isNotEmpty())
+                <span class="inline-flex items-center px-2.5 py-1 rounded-lg font-semibold bg-stone-100 text-stone-600 border border-stone-200 shadow-2xs">
+                    <strong>{{ $offDuty->count() }}</strong>&nbsp;Off-Duty
+                </span>
+            @endif
         </div>
     </div>
 
-    <!-- Live Available Queue -->
-    <div class="bg-white rounded-3xl border-2 border-emerald-300/80 p-5 sm:p-6 shadow-xs space-y-4">
-        <div class="border-b border-stone-100 pb-3 space-y-2">
-            <div class="flex items-center space-x-2.5">
-                <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse flex-shrink-0"></span>
-                <h2 class="text-base sm:text-lg font-black text-stone-900 leading-snug">
-                    Available in Queue (Ready to Serve)
-                </h2>
-            </div>
-            <div class="flex items-center justify-between flex-wrap gap-2 pt-0.5 pl-5.5">
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-200 shadow-2xs whitespace-nowrap">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 mr-1.5"></span>
-                    {{ $availableQueue->count() }} Ready
-                </span>
-                <span class="text-[11px] text-stone-400 font-medium">
-                    Queue order (Turn 1, 2, 3...)
-                </span>
-            </div>
-        </div>
+    <!-- Main Content: Compact Two-Column Grid (Available Queue vs Active Lanes) -->
+    <div class="grid grid-cols-1 xl:grid-cols-12 gap-4">
 
-        @if($availableQueue->isEmpty())
-            <div class="p-8 text-center text-xs text-stone-500 bg-stone-50 rounded-2xl space-y-2 border border-stone-200/60">
-                <i data-lucide="clock" class="w-8 h-8 text-stone-300 mx-auto"></i>
-                <div class="font-bold text-stone-800 text-sm">No staff currently available in the queue.</div>
-                <div>All staff are currently serving clients, on home service, or on break.</div>
+        <!-- Left Column: Available Turn Queue (Pila) - Compact List View (Takes 7 cols on XL) -->
+        <div class="xl:col-span-7 bg-white rounded-2xl border border-stone-200/80 shadow-2xs overflow-hidden flex flex-col">
+            
+            <!-- Section Header -->
+            <div class="p-3.5 bg-gradient-to-r from-emerald-50/70 to-teal-50/40 border-b border-emerald-100 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <h2 class="text-xs sm:text-sm font-black text-stone-900 tracking-tight flex items-center space-x-1.5">
+                        <span>Available Queue (Turn Order)</span>
+                    </h2>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                        {{ $availableQueue->count() }}
+                    </span>
+                </div>
+                <span class="text-[10px] text-stone-500 hidden sm:inline">Priority: Top (#1) gets next customer</span>
             </div>
-        @else
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                @foreach($availableQueue as $staff)
-                    <div class="bg-emerald-50/40 rounded-2xl border border-emerald-200/60 p-4 shadow-2xs hover:border-emerald-400 transition space-y-3">
-                        <div class="flex items-start justify-between">
-                            <div class="flex items-center space-x-3">
-                                <span class="w-8 h-8 rounded-xl bg-emerald-700 text-white flex items-center justify-center font-black text-sm shadow-xs">
+
+            <!-- Compact Table / Dense List -->
+            @if($availableQueue->isEmpty())
+                <div class="p-8 text-center text-xs text-stone-500 space-y-1.5">
+                    <i data-lucide="clock" class="w-6 h-6 text-stone-300 mx-auto"></i>
+                    <div class="font-bold text-stone-700">No staff currently waiting in the queue.</div>
+                    <div class="text-[11px] text-stone-400">All staff are currently serving or on break.</div>
+                </div>
+            @else
+                <div class="divide-y divide-stone-100 overflow-x-auto">
+                    @foreach($availableQueue as $staff)
+                        <div class="p-2.5 sm:px-3.5 hover:bg-emerald-50/30 transition flex items-center justify-between gap-2 text-xs {{ $loop->first ? 'bg-emerald-50/20' : '' }}">
+                            
+                            <!-- Left: Rank + Name + Role -->
+                            <div class="flex items-center space-x-2.5 min-w-0">
+                                <!-- Rank Badge -->
+                                <span class="w-7 h-7 rounded-lg flex items-center justify-center font-black text-xs flex-shrink-0 {{ $loop->first ? 'bg-emerald-700 text-white shadow-2xs ring-2 ring-emerald-300/60' : 'bg-stone-100 text-stone-700 border border-stone-200' }}" title="Queue Turn #{{ $loop->iteration }}">
                                     #{{ $loop->iteration }}
                                 </span>
-                                <div>
-                                    <h3 class="font-black text-stone-900 text-sm leading-tight">
-                                        {{ $staff->nickname ?? $staff->name }}
-                                    </h3>
-                                    <span class="text-[11px] text-stone-500">{{ $staff->name }}</span>
+
+                                <div class="min-w-0">
+                                    <div class="flex items-center space-x-1.5">
+                                        <span class="font-black text-stone-900 text-xs sm:text-sm truncate">
+                                            {{ $staff->nickname ?? $staff->name }}
+                                        </span>
+                                        @if($loop->first)
+                                            <span class="text-[9px] px-1.5 py-0.2 rounded font-extrabold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-200 whitespace-nowrap">
+                                                Next Up
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <div class="flex items-center space-x-2 text-[10px] text-stone-500">
+                                        <span class="font-semibold text-emerald-800 capitalize flex items-center space-x-1">
+                                            @if($staff->specialization === 'manicurist')
+                                                <span>💅 Manicurist</span>
+                                            @elseif($staff->specialization === 'massage_therapist')
+                                                <span>💆 Massage</span>
+                                            @else
+                                                <span>✨ All-Around</span>
+                                            @endif
+                                        </span>
+                                        <span>&bull;</span>
+                                        <span>Served today: <strong class="text-stone-800">{{ $staff->customers_served_today }}</strong></span>
+                                    </div>
                                 </div>
                             </div>
-                            <span class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                Next Turn
-                            </span>
+
+                            <!-- Right: Reorder + Quick Dispatch Actions -->
+                            <div class="flex items-center space-x-1.5 flex-shrink-0">
+                                
+                                <!-- Admin Reorder Controls (Move Up/Down) -->
+                                @if(Auth::user()->role === 'admin' && $availableQueue->count() > 1)
+                                    <div class="flex items-center space-x-0.5 pr-1 border-r border-stone-200">
+                                        @if(!$loop->first)
+                                            <form action="{{ route('queue.move', ['id' => $staff->id, 'direction' => 'up']) }}" method="POST" class="inline">
+                                                @csrf
+                                                <button type="submit" class="p-1 rounded hover:bg-stone-200 text-stone-500 hover:text-stone-800" title="Move Up">
+                                                    <i data-lucide="chevron-up" class="w-3.5 h-3.5"></i>
+                                                </button>
+                                            </form>
+                                        @endif
+                                        @if(!$loop->last)
+                                            <form action="{{ route('queue.move', ['id' => $staff->id, 'direction' => 'down']) }}" method="POST" class="inline">
+                                                @csrf
+                                                <button type="submit" class="p-1 rounded hover:bg-stone-200 text-stone-500 hover:text-stone-800" title="Move Down">
+                                                    <i data-lucide="chevron-down" class="w-3.5 h-3.5"></i>
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                @endif
+
+                                <!-- 1-Tap Quick Status Buttons (Dense) -->
+                                <div class="flex items-center space-x-1">
+                                    <form action="{{ route('queue.update-status', $staff->id) }}" method="POST" class="inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <input type="hidden" name="status" value="serving_in_shop">
+                                        <button type="submit" class="px-2 py-1 rounded-md bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200/80 font-bold text-[10px] transition inline-flex items-center space-x-1" title="Set to Serving In-Shop">
+                                            <i data-lucide="store" class="w-3 h-3 text-teal-700"></i>
+                                            <span class="hidden sm:inline">In-Shop</span>
+                                        </button>
+                                    </form>
+
+                                    <form action="{{ route('queue.update-status', $staff->id) }}" method="POST" class="inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <input type="hidden" name="status" value="on_home_service">
+                                        <button type="submit" class="px-2 py-1 rounded-md bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200/80 font-bold text-[10px] transition inline-flex items-center space-x-1" title="Set to Out on Home Service">
+                                            <i data-lucide="home" class="w-3 h-3 text-sky-700"></i>
+                                            <span class="hidden sm:inline">Home Svc</span>
+                                        </button>
+                                    </form>
+
+                                    <form action="{{ route('queue.update-status', $staff->id) }}" method="POST" class="inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <input type="hidden" name="status" value="on_break">
+                                        <button type="submit" class="px-1.5 py-1 rounded-md bg-stone-100 hover:bg-amber-100 text-stone-600 hover:text-amber-800 font-bold text-[10px] transition inline-flex items-center" title="Send to Break">
+                                            <i data-lucide="coffee" class="w-3 h-3"></i>
+                                        </button>
+                                    </form>
+                                </div>
+
+                            </div>
                         </div>
+                    @endforeach
+                </div>
+            @endif
+        </div>
 
-                        <div class="text-[11px] text-stone-600 flex items-center justify-between pt-1 border-t border-emerald-100">
-                            <span class="text-emerald-800 font-bold capitalize flex items-center space-x-1">
-                                <i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-700"></i>
-                                <span>{{ str_replace('_', ' ', $staff->specialization) }}</span>
-                            </span>
-                            <span class="text-stone-500">Served today: <strong class="text-stone-800">{{ $staff->customers_served_today }}</strong></span>
-                        </div>
-
-                        <!-- 1-Tap Status Switch -->
-                        <div class="pt-2 border-t border-emerald-100 flex flex-wrap gap-1.5 text-xs">
-                            <form action="{{ route('queue.update-status', $staff->id) }}" method="POST" class="inline">
-                                @csrf
-                                @method('PATCH')
-                                <input type="hidden" name="status" value="serving_in_shop">
-                                <button type="submit" class="px-2.5 py-1 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 text-[11px] font-bold transition inline-flex items-center space-x-1">
-                                    <i data-lucide="store" class="w-3 h-3"></i>
-                                    <span>In-Shop</span>
-                                </button>
-                            </form>
-
-                            <form action="{{ route('queue.update-status', $staff->id) }}" method="POST" class="inline">
-                                @csrf
-                                @method('PATCH')
-                                <input type="hidden" name="status" value="on_home_service">
-                                <button type="submit" class="px-2.5 py-1 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 text-[11px] font-bold transition inline-flex items-center space-x-1">
-                                    <i data-lucide="home" class="w-3 h-3"></i>
-                                    <span>Home Svc</span>
-                                </button>
-                            </form>
-
-                            <form action="{{ route('queue.update-status', $staff->id) }}" method="POST" class="inline">
-                                @csrf
-                                @method('PATCH')
-                                <input type="hidden" name="status" value="on_break">
-                                <button type="submit" class="px-2.5 py-1 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-[11px] font-bold transition inline-flex items-center space-x-1">
-                                    <i data-lucide="coffee" class="w-3 h-3"></i>
-                                    <span>Break</span>
-                                </button>
-                            </form>
-                        </div>
+        <!-- Right Column: Currently Active Staff Lanes (Takes 5 cols on XL) -->
+        <div class="xl:col-span-5 space-y-3.5">
+            
+            <!-- Lane 1: Serving In-Shop (Teal) -->
+            <div class="bg-white rounded-2xl border border-stone-200/80 shadow-2xs overflow-hidden">
+                <div class="px-3.5 py-2.5 bg-teal-50/60 border-b border-teal-100 flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-2 h-2 rounded-full bg-teal-500"></span>
+                        <h3 class="text-xs font-black text-stone-900 flex items-center space-x-1.5">
+                            <i data-lucide="store" class="w-3.5 h-3.5 text-teal-700"></i>
+                            <span>Serving In-Shop</span>
+                        </h3>
                     </div>
-                @endforeach
+                    <span class="text-[10px] font-bold px-2 py-0.2 rounded-full bg-teal-100 text-teal-800 border border-teal-200">
+                        {{ $servingInShop->count() }} active
+                    </span>
+                </div>
+
+                <div class="divide-y divide-stone-100">
+                    @forelse($servingInShop as $staff)
+                        <div class="p-2.5 px-3.5 flex items-center justify-between gap-2 text-xs hover:bg-stone-50/50">
+                            <div class="min-w-0">
+                                <span class="font-bold text-stone-900 block truncate">{{ $staff->nickname ?? $staff->name }}</span>
+                                <span class="text-[10px] text-teal-700 font-medium capitalize">{{ str_replace('_', ' ', $staff->specialization) }}</span>
+                            </div>
+                            <form action="{{ route('queue.update-status', $staff->id) }}" method="POST" class="flex-shrink-0">
+                                @csrf
+                                @method('PATCH')
+                                <input type="hidden" name="status" value="available">
+                                <button type="submit" class="px-2.5 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-[10px] shadow-2xs transition inline-flex items-center space-x-1">
+                                    <i data-lucide="check" class="w-3 h-3"></i>
+                                    <span>Finish &bull; Requeue</span>
+                                </button>
+                            </form>
+                        </div>
+                    @empty
+                        <div class="p-3 text-center text-[11px] text-stone-400">
+                            No staff currently serving inside the salon.
+                        </div>
+                    @endforelse
+                </div>
             </div>
-        @endif
+
+            <!-- Lane 2: Out on Home Service (Sky) -->
+            <div class="bg-white rounded-2xl border border-stone-200/80 shadow-2xs overflow-hidden">
+                <div class="px-3.5 py-2.5 bg-sky-50/60 border-b border-sky-100 flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-2 h-2 rounded-full bg-sky-500"></span>
+                        <h3 class="text-xs font-black text-stone-900 flex items-center space-x-1.5">
+                            <i data-lucide="home" class="w-3.5 h-3.5 text-sky-700"></i>
+                            <span>Out on Home Service</span>
+                        </h3>
+                    </div>
+                    <span class="text-[10px] font-bold px-2 py-0.2 rounded-full bg-sky-100 text-sky-800 border border-sky-200">
+                        {{ $onHomeService->count() }} out
+                    </span>
+                </div>
+
+                <div class="divide-y divide-stone-100">
+                    @forelse($onHomeService as $staff)
+                        <div class="p-2.5 px-3.5 flex items-center justify-between gap-2 text-xs hover:bg-stone-50/50">
+                            <div class="min-w-0">
+                                <span class="font-bold text-stone-900 block truncate">{{ $staff->nickname ?? $staff->name }}</span>
+                                <span class="text-[10px] text-sky-700 font-medium capitalize">{{ str_replace('_', ' ', $staff->specialization) }}</span>
+                            </div>
+                            <form action="{{ route('queue.update-status', $staff->id) }}" method="POST" class="flex-shrink-0">
+                                @csrf
+                                @method('PATCH')
+                                <input type="hidden" name="status" value="available">
+                                <button type="submit" class="px-2.5 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-[10px] shadow-2xs transition inline-flex items-center space-x-1">
+                                    <i data-lucide="check" class="w-3 h-3"></i>
+                                    <span>Returned &bull; Requeue</span>
+                                </button>
+                            </form>
+                        </div>
+                    @empty
+                        <div class="p-3 text-center text-[11px] text-stone-400">
+                            No staff currently on home service.
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+
+            <!-- Lane 3: On Break & Off Duty (Amber/Stone) -->
+            <div class="bg-white rounded-2xl border border-stone-200/80 shadow-2xs overflow-hidden">
+                <div class="px-3.5 py-2.5 bg-amber-50/50 border-b border-amber-100 flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="coffee" class="w-3.5 h-3.5 text-amber-700"></i>
+                        <h3 class="text-xs font-black text-stone-900">On Break / Off-Duty</h3>
+                    </div>
+                    <span class="text-[10px] font-bold px-2 py-0.2 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                        {{ $onBreak->count() + $offDuty->count() }}
+                    </span>
+                </div>
+
+                <div class="divide-y divide-stone-100">
+                    @forelse($onBreak->concat($offDuty) as $staff)
+                        <div class="p-2.5 px-3.5 flex items-center justify-between gap-2 text-xs hover:bg-stone-50/50">
+                            <div class="min-w-0">
+                                <div class="flex items-center space-x-1.5">
+                                    <span class="font-bold text-stone-900 truncate">{{ $staff->nickname ?? $staff->name }}</span>
+                                    <span class="text-[9px] px-1.5 py-0.2 rounded font-bold uppercase {{ $staff->status === 'on_break' ? 'bg-amber-100 text-amber-800' : 'bg-stone-100 text-stone-600' }}">
+                                        {{ $staff->status === 'on_break' ? 'Break' : 'Off-Duty' }}
+                                    </span>
+                                </div>
+                                <span class="text-[10px] text-stone-400 capitalize">{{ str_replace('_', ' ', $staff->specialization) }}</span>
+                            </div>
+                            <form action="{{ route('queue.update-status', $staff->id) }}" method="POST" class="flex-shrink-0">
+                                @csrf
+                                @method('PATCH')
+                                <input type="hidden" name="status" value="available">
+                                <button type="submit" class="px-2.5 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-[10px] shadow-2xs transition inline-flex items-center space-x-1">
+                                    <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                                    <span>Set Ready</span>
+                                </button>
+                            </form>
+                        </div>
+                    @empty
+                        <div class="p-3 text-center text-[11px] text-stone-400">
+                            No staff on break or off-duty.
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+
+        </div>
+
     </div>
 
-    <!-- Active Serving & Home Service Sections -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-
-        <!-- Serving In-Shop (Teal) -->
-        <div class="bg-white rounded-3xl border border-teal-200/80 p-5 shadow-xs space-y-3">
-            <div class="border-b border-stone-100 pb-2.5 space-y-1.5">
-                <div class="flex items-center space-x-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-teal-500 flex-shrink-0"></span>
-                    <h2 class="text-sm font-black text-stone-900 flex items-center space-x-1.5">
-                        <i data-lucide="store" class="w-4 h-4 text-teal-800"></i>
-                        <span>Currently Serving In-Shop</span>
-                    </h2>
-                </div>
-                <div class="flex items-center pl-4.5">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-teal-50 text-teal-800 border border-teal-200 whitespace-nowrap">
-                        <span class="w-1.5 h-1.5 rounded-full bg-teal-600 mr-1.5"></span>
-                        {{ $servingInShop->count() }} Active
-                    </span>
-                </div>
+    <!-- Full Staff Roster Matrix (Compact Admin Grid - All Staff at a Glance) -->
+    <div class="bg-white rounded-2xl border border-stone-200/80 shadow-2xs overflow-hidden">
+        <div class="p-3.5 bg-stone-50 border-b border-stone-200/80 flex items-center justify-between">
+            <div>
+                <h3 class="text-xs sm:text-sm font-black text-stone-900 tracking-tight flex items-center space-x-2">
+                    <i data-lucide="list-checks" class="w-4 h-4 text-emerald-800"></i>
+                    <span>All Staff Status Matrix (Full Roster)</span>
+                </h3>
             </div>
-
-            @forelse($servingInShop as $staff)
-                <div class="p-3 bg-stone-50 rounded-2xl border border-stone-200/60 flex items-center justify-between text-xs">
-                    <div>
-                        <span class="font-extrabold text-stone-900 text-sm block">{{ $staff->nickname ?? $staff->name }}</span>
-                        <span class="text-[10px] text-teal-700 font-semibold">Serving client in salon</span>
-                    </div>
-                    <form action="{{ route('queue.update-status', $staff->id) }}" method="POST">
-                        @csrf
-                        @method('PATCH')
-                        <input type="hidden" name="status" value="available">
-                        <button type="submit" class="px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs transition inline-flex items-center space-x-1">
-                            <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
-                            <span>Done &bull; Return</span>
-                        </button>
-                    </form>
-                </div>
-            @empty
-                <div class="p-4 text-center text-xs text-stone-400 bg-stone-50 rounded-xl">
-                    No staff currently serving clients in-shop.
-                </div>
-            @endforelse
+            <span class="text-[11px] text-stone-500 font-semibold">
+                {{ $allStaff->count() }} Total Staff Members
+            </span>
         </div>
 
-        <!-- On Home Service (Sky) -->
-        <div class="bg-white rounded-3xl border border-sky-200/80 p-5 shadow-xs space-y-3">
-            <div class="border-b border-stone-100 pb-2.5 space-y-1.5">
-                <div class="flex items-center space-x-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-sky-500 flex-shrink-0"></span>
-                    <h2 class="text-sm font-black text-stone-900 flex items-center space-x-1.5">
-                        <i data-lucide="home" class="w-4 h-4 text-sky-800"></i>
-                        <span>Out on Home Service</span>
-                    </h2>
-                </div>
-                <div class="flex items-center pl-4.5">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-sky-50 text-sky-800 border border-sky-200 whitespace-nowrap">
-                        <span class="w-1.5 h-1.5 rounded-full bg-sky-600 mr-1.5"></span>
-                        {{ $onHomeService->count() }} Out
-                    </span>
-                </div>
-            </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                    <tr class="border-b border-stone-200 bg-stone-50/50 text-stone-500 text-[10px] font-bold uppercase tracking-wider">
+                        <th class="py-2.5 px-3">Queue #</th>
+                        <th class="py-2.5 px-3">Attendant</th>
+                        <th class="py-2.5 px-3">Specialization</th>
+                        <th class="py-2.5 px-3">Current Status</th>
+                        <th class="py-2.5 px-3 text-center">Served Today</th>
+                        <th class="py-2.5 px-3 text-right">Quick Action</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-stone-100">
+                    @foreach($allStaff as $staff)
+                        <tr class="hover:bg-stone-50/60 transition">
+                            <!-- Queue Rank -->
+                            <td class="py-2.5 px-3 font-mono font-bold text-stone-600">
+                                @if($staff->status === 'available')
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-black bg-emerald-100 text-emerald-900">
+                                        #{{ $staff->queue_position }}
+                                    </span>
+                                @else
+                                    <span class="text-stone-300 text-[11px]">—</span>
+                                @endif
+                            </td>
 
-            @forelse($onHomeService as $staff)
-                <div class="p-3 bg-stone-50 rounded-2xl border border-stone-200/60 flex items-center justify-between text-xs">
-                    <div>
-                        <span class="font-extrabold text-stone-900 text-sm block">{{ $staff->nickname ?? $staff->name }}</span>
-                        <span class="text-[10px] text-sky-700 font-semibold">On home service appointment</span>
-                    </div>
-                    <form action="{{ route('queue.update-status', $staff->id) }}" method="POST">
-                        @csrf
-                        @method('PATCH')
-                        <input type="hidden" name="status" value="available">
-                        <button type="submit" class="px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs transition inline-flex items-center space-x-1">
-                            <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
-                            <span>Returned &bull; Return</span>
-                        </button>
-                    </form>
-                </div>
-            @empty
-                <div class="p-4 text-center text-xs text-stone-400 bg-stone-50 rounded-xl">
-                    No staff currently on home service.
-                </div>
-            @endforelse
+                            <!-- Attendant Name -->
+                            <td class="py-2.5 px-3">
+                                <div class="font-bold text-stone-900 text-xs">{{ $staff->nickname ?? $staff->name }}</div>
+                                <div class="text-[10px] text-stone-400">{{ $staff->name }}</div>
+                            </td>
+
+                            <!-- Specialization -->
+                            <td class="py-2.5 px-3">
+                                <span class="capitalize text-stone-700 text-[11px] font-semibold">
+                                    {{ str_replace('_', ' ', $staff->specialization) }}
+                                </span>
+                            </td>
+
+                            <!-- Current Status Badge -->
+                            <td class="py-2.5 px-3">
+                                @php
+                                    $badgeStyle = match($staff->status) {
+                                        'available' => 'bg-emerald-50 text-emerald-800 border-emerald-200',
+                                        'serving_in_shop' => 'bg-teal-50 text-teal-800 border-teal-200',
+                                        'on_home_service' => 'bg-sky-50 text-sky-800 border-sky-200',
+                                        'on_break' => 'bg-amber-50 text-amber-800 border-amber-200',
+                                        default => 'bg-stone-100 text-stone-600 border-stone-200',
+                                    };
+                                @endphp
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $badgeStyle }}">
+                                    {{ $staff->status_badge['label'] }}
+                                </span>
+                            </td>
+
+                            <!-- Served Today -->
+                            <td class="py-2.5 px-3 text-center font-bold text-stone-800">
+                                {{ $staff->customers_served_today }}
+                            </td>
+
+                            <!-- Quick Action Form -->
+                            <td class="py-2.5 px-3 text-right">
+                                <form action="{{ route('queue.update-status', $staff->id) }}" method="POST" class="inline-flex items-center space-x-1">
+                                    @csrf
+                                    @method('PATCH')
+                                    <select name="status" onchange="this.form.submit()" class="text-[10px] font-semibold py-1 px-2 rounded-lg border border-stone-200 bg-white text-stone-700 focus:outline-none focus:ring-1 focus:ring-emerald-600 cursor-pointer">
+                                        <option value="available" {{ $staff->status === 'available' ? 'selected' : '' }}>Available (Ready)</option>
+                                        <option value="serving_in_shop" {{ $staff->status === 'serving_in_shop' ? 'selected' : '' }}>Serving In-Shop</option>
+                                        <option value="on_home_service" {{ $staff->status === 'on_home_service' ? 'selected' : '' }}>Home Service</option>
+                                        <option value="on_break" {{ $staff->status === 'on_break' ? 'selected' : '' }}>On Break</option>
+                                        <option value="off_duty" {{ $staff->status === 'off_duty' ? 'selected' : '' }}>Off Duty</option>
+                                    </select>
+                                </form>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
         </div>
-
     </div>
-
-    <!-- On Break Section -->
-    @if($onBreak->isNotEmpty())
-        <div class="bg-white rounded-3xl border border-amber-200/80 p-5 shadow-xs space-y-3">
-            <div class="border-b border-stone-100 pb-2.5 space-y-1.5">
-                <div class="flex items-center space-x-2">
-                    <h2 class="text-sm font-black text-amber-900 flex items-center space-x-2">
-                        <i data-lucide="coffee" class="w-4 h-4 text-amber-700"></i>
-                        <span>On Break</span>
-                    </h2>
-                </div>
-                <div class="flex items-center">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-200 whitespace-nowrap">
-                        <span class="w-1.5 h-1.5 rounded-full bg-amber-600 mr-1.5"></span>
-                        {{ $onBreak->count() }} on break
-                    </span>
-                </div>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                @foreach($onBreak as $staff)
-                    <div class="p-3 bg-stone-50 rounded-2xl border border-stone-200/60 flex items-center justify-between text-xs">
-                        <span class="font-extrabold text-stone-900">{{ $staff->nickname ?? $staff->name }}</span>
-                        <form action="{{ route('queue.update-status', $staff->id) }}" method="POST">
-                            @csrf
-                            @method('PATCH')
-                            <input type="hidden" name="status" value="available">
-                            <button type="submit" class="px-3 py-1 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs transition inline-flex items-center space-x-1">
-                                <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
-                                <span>Back to Queue</span>
-                            </button>
-                        </form>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    @endif
 
 </div>
 @endsection
