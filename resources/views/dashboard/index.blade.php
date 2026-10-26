@@ -39,16 +39,16 @@
                 </div>
             </div>
 
-            <!-- 1. BIG QUEUE VISIBILITY BANNER -->
+            <!-- 1. QUEUE VISIBILITY BANNER -->
             @if($myProfile->status === 'available')
                 <div class="bg-gradient-to-r from-emerald-600 to-teal-700 rounded-2xl p-4 sm:p-5 text-white shadow-md flex items-center justify-between">
                     <div class="space-y-0.5">
                         <span class="text-[10px] sm:text-xs uppercase tracking-wider font-extrabold text-emerald-100 block">
-                            Your Queue Position (Pila)
+                            Your Queue Status
                         </span>
-                        <div class="text-2xl sm:text-4xl font-black tracking-tight flex items-center space-x-2">
+                        <div class="text-xl sm:text-3xl font-black tracking-tight flex items-center space-x-2">
                             @if($myQueueTurn === 1)
-                                <span>⭐ YOU ARE #1 (NEXT UP!)</span>
+                                <span>YOU ARE #1 (NEXT IN LINE)</span>
                             @elseif($myQueueTurn)
                                 <span>YOU ARE #{{ $myQueueTurn }} IN LINE</span>
                             @else
@@ -56,7 +56,7 @@
                             @endif
                         </div>
                         <p class="text-[11px] text-emerald-100 font-medium">
-                            {{ $myQueueTurn === 1 ? 'Get ready! You will be assigned the next incoming client.' : 'Clients are assigned in fair rotation order.' }}
+                            {{ $myQueueTurn === 1 ? 'You will be assigned the next incoming client.' : 'Clients are assigned according to fair queue order.' }}
                         </p>
                     </div>
                     <div class="w-14 h-14 rounded-2xl bg-white/15 border border-white/20 flex flex-col items-center justify-center text-white flex-shrink-0">
@@ -68,22 +68,22 @@
                 <div class="bg-gradient-to-r from-teal-700 to-cyan-800 rounded-2xl p-4 sm:p-5 text-white shadow-md flex items-center justify-between">
                     <div>
                         <span class="text-[10px] uppercase tracking-wider font-extrabold text-teal-200 block">Current Status</span>
-                        <div class="text-xl sm:text-2xl font-black tracking-tight flex items-center space-x-2 mt-0.5">
+                        <div class="text-lg sm:text-xl font-black tracking-tight flex items-center space-x-2 mt-0.5">
                             <i data-lucide="{{ $myProfile->status === 'on_home_service' ? 'home' : 'store' }}" class="w-5 h-5"></i>
-                            <span>{{ $myProfile->status === 'on_home_service' ? 'OUT ON HOME SERVICE' : 'SERVING CLIENT IN-SHOP' }}</span>
+                            <span>{{ $myProfile->status === 'on_home_service' ? 'OUT ON HOME SERVICE' : 'SERVING CLIENT IN SALON' }}</span>
                         </div>
-                        <p class="text-[11px] text-teal-100 mt-0.5">Finish client service below to return to the available queue.</p>
+                        <p class="text-[11px] text-teal-100 mt-0.5">Complete client service below to return to the available queue.</p>
                     </div>
                 </div>
             @elseif($myProfile->status === 'on_break')
                 <div class="bg-gradient-to-r from-amber-600 to-amber-700 rounded-2xl p-4 text-white shadow-md flex items-center justify-between">
                     <div>
                         <span class="text-[10px] uppercase tracking-wider font-extrabold text-amber-100 block">Rest Period</span>
-                        <div class="text-xl font-black tracking-tight flex items-center space-x-2 mt-0.5">
+                        <div class="text-lg sm:text-xl font-black tracking-tight flex items-center space-x-2 mt-0.5">
                             <i data-lucide="coffee" class="w-5 h-5"></i>
                             <span>YOU ARE CURRENTLY ON BREAK</span>
                         </div>
-                        <p class="text-[11px] text-amber-100 mt-0.5">Tap below when you are ready to rejoin the available queue.</p>
+                        <p class="text-[11px] text-amber-100 mt-0.5">Click below when ready to return to the available queue.</p>
                     </div>
                 </div>
             @endif
@@ -93,7 +93,7 @@
                 <div class="bg-teal-50 border-2 border-teal-300 rounded-2xl p-4 sm:p-5 shadow-xs space-y-3">
                     <div class="flex items-center justify-between border-b border-teal-200/80 pb-2.5">
                         <div class="flex items-center space-x-2 text-teal-950 font-black text-xs sm:text-sm">
-                            <span class="w-2.5 h-2.5 rounded-full bg-teal-600 animate-ping"></span>
+                            <i data-lucide="bell" class="w-4 h-4 text-teal-700"></i>
                             <span>ACTIVE CLIENT ASSIGNMENT</span>
                         </div>
                         <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-teal-100 text-teal-800 border border-teal-200">
@@ -128,14 +128,14 @@
                         @csrf
                         @method('PATCH')
                         <button type="submit" class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-emerald-700 to-teal-700 hover:from-emerald-800 hover:to-teal-800 text-white font-black text-xs sm:text-sm shadow-md transition-all active:scale-[0.98] flex items-center justify-center space-x-2">
-                            <i data-lucide="check-circle-2" class="w-5 h-5"></i>
-                            <span>MARK AS DONE &bull; RETURN TO QUEUE</span>
+                            <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                            <span>Mark as Done (Return to Queue)</span>
                         </button>
                     </form>
                 </div>
             @endif
 
-            <!-- 3. PROMINENT ONE-TAP STATUS CONTROLS (Available vs On Break) -->
+            <!-- 3. ONE-TAP STATUS CONTROLS (Available vs On Break) -->
             <div class="pt-1">
                 <span class="text-[10px] font-extrabold uppercase tracking-wider text-stone-400 block mb-2">
                     Quick Status Toggle
@@ -146,9 +146,9 @@
                         @csrf
                         @method('PATCH')
                         <input type="hidden" name="status" value="on_break">
-                        <button type="submit" class="w-full py-3.5 px-4 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border-2 border-amber-300 font-black text-xs sm:text-sm shadow-2xs transition flex items-center justify-center space-x-2 active:scale-[0.98]">
+                        <button type="submit" class="w-full py-3.5 px-4 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border-2 border-amber-300 font-bold text-xs sm:text-sm shadow-2xs transition flex items-center justify-center space-x-2 active:scale-[0.98]">
                             <i data-lucide="coffee" class="w-4 h-4 text-amber-700"></i>
-                            <span>TAKE A BREAK (PAHINGA MUNA)</span>
+                            <span>Take a Break</span>
                         </button>
                     </form>
                 @else
@@ -156,9 +156,9 @@
                         @csrf
                         @method('PATCH')
                         <input type="hidden" name="status" value="available">
-                        <button type="submit" class="w-full py-3.5 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white border-2 border-emerald-600 font-black text-xs sm:text-sm shadow-md transition flex items-center justify-center space-x-2 active:scale-[0.98]">
+                        <button type="submit" class="w-full py-3.5 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white border-2 border-emerald-600 font-bold text-xs sm:text-sm shadow-md transition flex items-center justify-center space-x-2 active:scale-[0.98]">
                             <i data-lucide="check" class="w-4 h-4"></i>
-                            <span>I AM READY &bull; SET TO AVAILABLE (PILA NA)</span>
+                            <span>Set Available (Ready for Clients)</span>
                         </button>
                     </form>
                 @endif

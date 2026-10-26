@@ -100,7 +100,7 @@
                     <span>Select Services & Assign Staff</span>
                 </h2>
                 <a href="{{ route('menu.index') }}" class="text-[11px] font-bold text-emerald-700 hover:underline inline-flex items-center space-x-1">
-                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                    <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
                     <span>View Menu</span>
                 </a>
             </div>
@@ -142,24 +142,24 @@
                                                 <option value="">-- Assign Attendant --</option>
                                                 
                                                 @if(isset($availableStaff) && $availableStaff->isNotEmpty())
-                                                    <optgroup label="🟢 AVAILABLE IN QUEUE (Priority Turn)" class="font-black text-emerald-900 bg-emerald-50 py-1">
+                                                    <optgroup label="Available Queue (Priority Turn)" class="font-bold text-emerald-900 bg-emerald-50 py-1">
                                                         @foreach($availableStaff as $idx => $staff)
                                                             @php
                                                                 $turn = $idx + 1;
                                                                 $isSelected = (isset($myStaffProfile) && $myStaffProfile->id == $staff->id) || (!isset($myStaffProfile) && $turn === 1);
                                                             @endphp
                                                             <option value="{{ $staff->id }}" {{ $isSelected ? 'selected' : '' }} class="text-stone-900 font-bold py-1.5 bg-white">
-                                                                {{ $turn === 1 ? '⭐ Turn #1 [NEXT UP]' : 'Turn #' . $turn }} &bull; {{ $staff->nickname ?? $staff->name }} ({{ ucfirst(str_replace('_', ' ', $staff->specialization)) }})
+                                                                {{ $turn === 1 ? 'Turn #1 (Next in line)' : 'Turn #' . $turn }} - {{ $staff->nickname ?? $staff->name }} ({{ ucfirst(str_replace('_', ' ', $staff->specialization)) }})
                                                             </option>
                                                         @endforeach
                                                     </optgroup>
                                                 @endif
 
                                                 @if(isset($busyStaff) && $busyStaff->isNotEmpty())
-                                                    <optgroup label="⚠️ BUSY / ON BREAK / OFF DUTY" class="font-bold text-amber-900 bg-amber-50/70 py-1">
+                                                    <optgroup label="Busy / On Break / Off-Duty" class="font-bold text-stone-500 bg-stone-100 py-1">
                                                         @foreach($busyStaff as $staff)
                                                             <option value="{{ $staff->id }}" {{ (isset($myStaffProfile) && $myStaffProfile->id == $staff->id) ? 'selected' : '' }} class="text-stone-500 font-normal py-1 bg-stone-50">
-                                                                ⏳ {{ $staff->nickname ?? $staff->name }} ({{ ucfirst(str_replace('_', ' ', $staff->status)) }})
+                                                                {{ $staff->nickname ?? $staff->name }} ({{ ucfirst(str_replace('_', ' ', $staff->status)) }})
                                                             </option>
                                                         @endforeach
                                                     </optgroup>

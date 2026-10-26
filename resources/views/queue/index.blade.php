@@ -44,7 +44,7 @@
     <!-- Main Content: Compact Two-Column Grid (Available Queue vs Active Lanes) -->
     <div class="grid grid-cols-1 xl:grid-cols-12 gap-4">
 
-        <!-- Left Column: Available Turn Queue (Pila) - Compact List View (Takes 7 cols on XL) -->
+        <!-- Left Column: Available Turn Queue - Compact List View (Takes 7 cols on XL) -->
         <div class="xl:col-span-7 bg-white rounded-2xl border border-stone-200/80 shadow-2xs overflow-hidden flex flex-col">
             
             <!-- Section Header -->
@@ -92,14 +92,8 @@
                                         @endif
                                     </div>
                                     <div class="flex items-center space-x-2 text-[10px] text-stone-500">
-                                        <span class="font-semibold text-emerald-800 capitalize flex items-center space-x-1">
-                                            @if($staff->specialization === 'manicurist')
-                                                <span>💅 Manicurist</span>
-                                            @elseif($staff->specialization === 'massage_therapist')
-                                                <span>💆 Massage</span>
-                                            @else
-                                                <span>✨ All-Around</span>
-                                            @endif
+                                        <span class="font-semibold text-emerald-800 capitalize">
+                                            {{ str_replace('_', ' ', $staff->specialization) }}
                                         </span>
                                         <span>&bull;</span>
                                         <span>Served today: <strong class="text-stone-800">{{ $staff->customers_served_today }}</strong></span>

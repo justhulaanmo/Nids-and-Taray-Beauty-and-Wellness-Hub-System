@@ -141,7 +141,7 @@
                         Services
                     </div>
                     <a href="{{ route('menu.index') }}" class="flex items-center space-x-2.5 px-3 py-2 rounded-xl transition font-semibold {{ request()->routeIs('menu.*') ? 'bg-emerald-50 text-emerald-900 border border-emerald-200/80 font-bold' : 'text-stone-600 hover:text-emerald-900 hover:bg-stone-50' }}">
-                        <i data-lucide="sparkles" class="w-4 h-4 {{ request()->routeIs('menu.*') ? 'text-emerald-700' : 'text-stone-400' }}"></i>
+                        <i data-lucide="book-open" class="w-4 h-4 {{ request()->routeIs('menu.*') ? 'text-emerald-700' : 'text-stone-400' }}"></i>
                         <span>Service Menu</span>
                     </a>
                     @if(Auth::user()->role === 'admin')

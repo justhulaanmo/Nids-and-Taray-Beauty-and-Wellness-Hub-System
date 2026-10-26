@@ -87,7 +87,7 @@
 
         @if($items->isEmpty())
             <div class="p-8 text-center text-xs text-stone-400 space-y-2">
-                <i data-lucide="sparkles" class="w-8 h-8 text-stone-300 mx-auto"></i>
+                <i data-lucide="inbox" class="w-8 h-8 text-stone-300 mx-auto"></i>
                 <div class="font-bold text-stone-800 text-sm">No recorded services for this date yet.</div>
                 <div>Recorded services and commissions will automatically appear here once added.</div>
             </div>

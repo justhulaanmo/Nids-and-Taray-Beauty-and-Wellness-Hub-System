@@ -30,8 +30,8 @@
         
         <!-- Header Banner -->
         <div class="px-6 pt-8 pb-6 text-center border-b border-emerald-900/10 bg-gradient-to-b from-emerald-50/90 to-white">
-            <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-700 to-teal-600 text-white shadow-md shadow-emerald-700/20 mb-3">
-                <i data-lucide="sparkles" class="w-7 h-7"></i>
+            <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-700 to-teal-600 text-white shadow-md shadow-emerald-700/20 mb-3 font-black text-xl tracking-wider">
+                NT
             </div>
             <h1 class="text-xl font-black tracking-tight text-stone-900">Nids and Taray</h1>
             <p class="text-emerald-800 text-[11px] font-extrabold uppercase tracking-widest mt-0.5">Beauty & Wellness Hub</p>

@@ -71,7 +71,7 @@
                                 </h3>
                                 <p class="text-[11px] text-stone-500">{{ $staff->name }}</p>
                                 <span class="inline-flex items-center space-x-1 text-[11px] font-bold text-emerald-800 capitalize">
-                                    <i data-lucide="sparkles" class="w-3 h-3 text-emerald-700"></i>
+                                    <i data-lucide="briefcase" class="w-3 h-3 text-emerald-700"></i>
                                     <span>{{ str_replace('_', ' ', $staff->specialization) }}</span>
                                 </span>
                             </div>
