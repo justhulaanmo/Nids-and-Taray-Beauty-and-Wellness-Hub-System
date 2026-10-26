@@ -220,16 +220,9 @@
 
                     <!-- Add Expense Button -->
                     <button type="button" onclick="openExpenseModal()"
-                        class="px-3.5 py-2 rounded-2xl bg-white/15 hover:bg-white/20 text-white border border-white/20 font-black text-xs shadow-xs transition active:scale-95 flex items-center space-x-1.5">
+                        class="px-3.5 py-2 rounded-2xl bg-white/15 hover:bg-white/20 text-white border border-white/20 font-black text-xs shadow-xs transition active:scale-95 flex items-center space-x-1.5 cursor-pointer">
                         <i data-lucide="plus-circle" class="w-4 h-4 text-emerald-300"></i>
                         <span>+ Add Expense</span>
-                    </button>
-
-                    <!-- Cashout Button -->
-                    <button type="button" onclick="openAdminCashoutModal()"
-                        class="px-3.5 py-2 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-stone-950 font-black text-xs shadow-xs transition active:scale-95 flex items-center space-x-1.5">
-                        <i data-lucide="arrow-up-right" class="w-4 h-4 text-stone-950"></i>
-                        <span>Cashout (₱{{ number_format($availableForCashout, 0) }})</span>
                     </button>
                 </div>
             </div>
@@ -273,19 +266,28 @@
                 </div>
 
                 <!-- 5. TRUE NET PROFIT (HERO CARD) -->
-                <div class="col-span-2 lg:col-span-1 p-3.5 rounded-2xl border {{ $monthTrueNetProfit >= 0 ? 'bg-emerald-600/30 border-emerald-400/50 text-emerald-100' : 'bg-rose-600/30 border-rose-400/50 text-rose-100' }}">
-                    <div class="flex items-center justify-between">
-                        <span class="text-[10px] font-black uppercase tracking-wider block">5. True Net Profit</span>
-                        <span class="text-[9px] font-bold px-1.5 py-0.2 rounded uppercase {{ $monthTrueNetProfit >= 0 ? 'bg-emerald-400/30 text-emerald-200' : 'bg-rose-400/30 text-rose-200' }}">
-                            {{ $monthTrueNetProfit >= 0 ? 'May Tubo' : 'Deficit' }}
+                <div class="col-span-2 lg:col-span-1 p-3.5 rounded-2xl border flex flex-col justify-between {{ $monthTrueNetProfit >= 0 ? 'bg-emerald-600/30 border-emerald-400/50 text-emerald-100' : 'bg-rose-600/30 border-rose-400/50 text-rose-100' }}">
+                    <div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-black uppercase tracking-wider block">5. True Net Profit</span>
+                            <span class="text-[9px] font-bold px-1.5 py-0.2 rounded uppercase {{ $monthTrueNetProfit >= 0 ? 'bg-emerald-400/30 text-emerald-200' : 'bg-rose-400/30 text-rose-200' }}">
+                                {{ $monthTrueNetProfit >= 0 ? 'May Tubo' : 'Deficit' }}
+                            </span>
+                        </div>
+                        <span class="text-2xl font-black block mt-0.5 {{ $monthTrueNetProfit >= 0 ? 'text-white' : 'text-rose-200' }}">
+                            {{ $monthTrueNetProfit < 0 ? '-' : '' }}₱{{ number_format(abs($monthTrueNetProfit), 2) }}
+                        </span>
+                        <span class="text-[10px] block mt-0.5 {{ $monthTrueNetProfit >= 0 ? 'text-emerald-200/90' : 'text-rose-200/90' }}">
+                            {{ $monthTrueNetProfit >= 0 ? 'Malinis na kita ng shop' : 'Kulang sa bayad ng gastusin' }}
                         </span>
                     </div>
-                    <span class="text-2xl font-black block mt-0.5 {{ $monthTrueNetProfit >= 0 ? 'text-white' : 'text-rose-200' }}">
-                        {{ $monthTrueNetProfit < 0 ? '-' : '' }}₱{{ number_format(abs($monthTrueNetProfit), 2) }}
-                    </span>
-                    <span class="text-[10px] block mt-0.5 {{ $monthTrueNetProfit >= 0 ? 'text-emerald-200/90' : 'text-rose-200/90' }}">
-                        {{ $monthTrueNetProfit >= 0 ? 'Malinis na kita ng shop' : 'Kulang sa bayad ng gastusin' }}
-                    </span>
+
+                    <!-- Cashout Button -->
+                    <button type="button" onclick="openAdminCashoutModal()"
+                        class="w-full mt-3 py-1.5 px-2 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-stone-950 font-black text-xs shadow-xs transition active:scale-95 flex items-center justify-center space-x-1.5 cursor-pointer">
+                        <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-stone-950 shrink-0"></i>
+                        <span>Cashout (₱{{ number_format($availableForCashout, 0) }})</span>
+                    </button>
                 </div>
             </div>
 
