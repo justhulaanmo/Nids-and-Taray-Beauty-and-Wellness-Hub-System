@@ -38,7 +38,7 @@ class ExpenseController extends Controller
 
         $expense = Expense::findOrFail($id);
         $desc = $expense->description;
-        $amount = $expense->amount;
+        $amount = (float) $expense->amount;
         $expense->delete();
 
         return back()->with('success', "Expense '{$desc}' (₱" . number_format($amount, 2) . ") deleted.");

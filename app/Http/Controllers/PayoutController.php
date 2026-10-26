@@ -181,7 +181,7 @@ class PayoutController extends Controller
             abort(403, 'Unauthorized to void this payout.');
         }
 
-        $amount = $payout->gross_amount;
+        $amount = (float) $payout->gross_amount;
         $ref = $payout->reference_no;
         $payout->delete();
 
