@@ -181,7 +181,7 @@
                     <div class="flex items-center gap-1.5 mt-2">
                         <button type="button" onclick="setStaffCashoutAmount(100)" class="px-2.5 py-1 rounded-lg bg-stone-100 hover:bg-stone-200 text-[10px] font-bold text-stone-700">₱100</button>
                         <button type="button" onclick="setStaffCashoutAmount(200)" class="px-2.5 py-1 rounded-lg bg-stone-100 hover:bg-stone-200 text-[10px] font-bold text-stone-700">₱200</button>
-                        <button type="button" onclick="setStaffCashoutAmount({{ $availableCommissionBalance }})" class="px-2.5 py-1 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-[10px] font-bold text-emerald-800">Max</button>
+                        <button type="button" onclick="setStaffCashoutMax()" class="px-2.5 py-1 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-[10px] font-bold text-emerald-800">Max</button>
                     </div>
                 </div>
 
@@ -245,6 +245,11 @@
     function setStaffCashoutAmount(amount) {
         const input = document.getElementById('staff_cashout_amount');
         if (input) input.value = amount;
+    }
+
+    function setStaffCashoutMax() {
+        const input = document.getElementById('staff_cashout_amount');
+        if (input && input.max) input.value = input.max;
     }
 </script>
 @endpush
