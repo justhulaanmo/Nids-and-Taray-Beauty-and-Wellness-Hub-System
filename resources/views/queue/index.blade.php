@@ -3,15 +3,15 @@
 @section('content')
 <div class="space-y-4">
 
-    <!-- Top Header & At-a-Glance Stat Pills -->
-    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+    <!-- Top Header & At-a-Glance Stat Pills (Solid Card) -->
+    <div class="bg-white rounded-3xl border border-stone-200/90 p-4 sm:p-5 shadow-2xs flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
         <div>
             <h1 class="text-lg sm:text-xl font-black text-stone-900 tracking-tight flex items-center space-x-2">
                 <i data-lucide="users" class="w-5 h-5 text-emerald-800"></i>
                 <span>Queue Board & Staff Roster</span>
             </h1>
-            <p class="text-[11px] text-stone-500">
-                Live rotation queue, attendant assignments, and one-tap status switcher.
+            <p class="text-xs text-stone-600 mt-0.5 font-medium">
+                Live rotation queue, attendant assignments, and fair turn order.
             </p>
         </div>
 

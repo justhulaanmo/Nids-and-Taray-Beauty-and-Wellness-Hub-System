@@ -84,9 +84,9 @@
     @endphp
 
     <!-- Subtle Luxury Spa Background Wallpaper Layer (Adaptive to Admin vs Employee) -->
-    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none">
-        <img src="{{ $bgImage }}" alt="" class="w-full h-full object-cover filter brightness-[0.96] contrast-[1.02] scale-105">
-        <div class="absolute inset-0 bg-[#f6f9f6]/88 backdrop-blur-[1px]"></div>
+    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none bg-[#f6f9f6]">
+        <img src="{{ $bgImage }}" alt="" class="w-full h-full object-cover opacity-20 filter blur-[1px] scale-105">
+        <div class="absolute inset-0 bg-white/75"></div>
     </div>
 
     <!-- Mobile Top Bar (Visible only on small screens) -->

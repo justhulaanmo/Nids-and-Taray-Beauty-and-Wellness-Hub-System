@@ -3,69 +3,69 @@
 @section('content')
 <div class="max-w-3xl mx-auto space-y-5">
 
-    <!-- Top Profile & Date Filter -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <!-- Top Profile & Date Filter (Crisp White Card for 100% Clarity) -->
+    <div class="bg-white rounded-3xl border border-stone-200/90 p-4 sm:p-5 shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
             <h1 class="text-xl sm:text-2xl font-black text-stone-900 tracking-tight flex items-center space-x-2">
                 <i data-lucide="wallet" class="w-6 h-6 text-emerald-800"></i>
                 <span>My Wallet & Earnings</span>
             </h1>
-            <p class="text-xs text-stone-500 mt-0.5">
-                Staff: <strong class="text-emerald-800">{{ $staffProfile->nickname ?? $staffProfile->name }}</strong> ({{ $staffProfile->commission_rate }}% Commission Rate)
+            <p class="text-xs text-stone-600 mt-1 font-semibold">
+                Attendant: <strong class="text-emerald-900 font-extrabold">{{ $staffProfile->nickname ?? $staffProfile->name }}</strong> ({{ $staffProfile->commission_rate }}% Commission Rate)
             </p>
         </div>
 
-        <form method="GET" action="{{ route('wallet.index') }}" class="flex items-center space-x-2 bg-white p-1.5 rounded-2xl border border-emerald-900/10 shadow-xs self-start sm:self-auto">
-            <span class="text-xs font-bold text-stone-500 pl-2">Date:</span>
+        <form method="GET" action="{{ route('wallet.index') }}" class="flex items-center space-x-2 bg-stone-50 p-1.5 rounded-2xl border border-stone-200 shadow-2xs self-start sm:self-auto">
+            <span class="text-xs font-bold text-stone-600 pl-2">Date:</span>
             <input type="date" name="date" value="{{ $selectedDate }}" onchange="this.form.submit()"
-                class="px-2.5 py-1 text-xs font-bold bg-stone-50 text-stone-800 rounded-xl border border-stone-200 focus:outline-hidden focus:ring-1 focus:ring-emerald-500">
-            <button type="submit" class="px-3 py-1 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-xs transition">
+                class="px-2.5 py-1 text-xs font-bold bg-white text-stone-900 rounded-xl border border-stone-300 focus:outline-hidden focus:ring-1 focus:ring-emerald-500">
+            <button type="submit" class="px-3.5 py-1 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-xs transition">
                 Filter
             </button>
         </form>
     </div>
 
-    <!-- Main Wallet Cards (Light Green Wellness Theme) -->
+    <!-- Main Wallet Cards (Solid High-Contrast Wellness Theme) -->
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <!-- Customers Count -->
-        <div class="bg-white rounded-3xl p-4 border border-emerald-900/10 shadow-xs space-y-1">
-            <span class="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">Clients Served</span>
+        <div class="bg-white rounded-3xl p-4 border border-stone-200 shadow-xs space-y-1">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-stone-500 block">Clients Served</span>
             <span class="text-3xl font-black text-stone-900 block">{{ $totalCustomersCount }}</span>
-            <span class="text-[11px] text-stone-500 block">{{ $totalServicesCount }} treatments</span>
+            <span class="text-[11px] text-stone-600 font-medium block">{{ $totalServicesCount }} treatments</span>
         </div>
 
         <!-- My Commission -->
-        <div class="bg-emerald-50 rounded-3xl p-4 border border-emerald-200 shadow-xs space-y-1">
-            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-800 block">My Commission</span>
+        <div class="bg-emerald-50 rounded-3xl p-4 border-2 border-emerald-300 shadow-xs space-y-1">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-900 block">My Commission</span>
             <span class="text-2xl sm:text-3xl font-black text-emerald-800 block">₱{{ number_format($myTotalCommission, 2) }}</span>
-            <span class="text-[10px] text-emerald-700/80 font-bold block">Personal Earnings</span>
+            <span class="text-[10px] text-emerald-700 font-bold block">Personal Earnings</span>
         </div>
 
         <!-- Cash in Hand -->
-        <div class="bg-white rounded-3xl p-4 border border-emerald-900/10 shadow-xs space-y-1">
-            <span class="text-[10px] font-bold uppercase tracking-wider text-stone-400 block">Cash Collected</span>
+        <div class="bg-white rounded-3xl p-4 border border-stone-200 shadow-xs space-y-1">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-stone-500 block">Cash Collected</span>
             <span class="text-2xl sm:text-3xl font-black text-stone-900 block">₱{{ number_format($cashCollected, 2) }}</span>
-            <span class="text-[10px] text-stone-500 block">From cash clients</span>
+            <span class="text-[10px] text-stone-600 font-medium block">From cash clients</span>
         </div>
 
         <!-- Remit to Shop -->
-        <div class="bg-teal-50 rounded-3xl p-4 border border-teal-200 shadow-xs space-y-1">
-            <span class="text-[10px] font-bold uppercase tracking-wider text-teal-800 block">Cash Due to Shop</span>
+        <div class="bg-teal-50 rounded-3xl p-4 border-2 border-teal-300 shadow-xs space-y-1">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-teal-900 block">Cash Due to Shop</span>
             <span class="text-2xl sm:text-3xl font-black text-teal-800 block">₱{{ number_format($cashToRemitToShop, 2) }}</span>
-            <span class="text-[10px] text-teal-700/80 font-bold block">End-of-Shift Remit</span>
+            <span class="text-[10px] text-teal-700 font-bold block">End-of-Shift Remit</span>
         </div>
     </div>
 
-    <!-- Quick Formula / Explainer Banner -->
-    <div class="bg-emerald-50/60 rounded-3xl p-4 border border-emerald-200 text-xs text-stone-700 flex items-start space-x-3 shadow-xs">
+    <!-- Quick Formula / Explainer Banner (Solid White Card for Crisp Legibility) -->
+    <div class="bg-white rounded-3xl p-4 sm:p-5 border-2 border-emerald-200 text-xs text-stone-700 flex items-start space-x-3 shadow-xs">
         <i data-lucide="help-circle" class="w-5 h-5 text-emerald-700 flex-shrink-0 mt-0.5"></i>
         <div>
-            <strong class="text-stone-900">How is the cash remittance calculated?</strong>
-            <p class="mt-0.5 text-stone-600">
-                From total cash collected (<strong>₱{{ number_format($cashCollected, 2) }}</strong>), subtract your commission (<strong>{{ $staffProfile->commission_rate }}%</strong>). The remaining balance to turn in to the shop is <strong>₱{{ number_format($cashToRemitToShop, 2) }}</strong>.
+            <strong class="text-stone-900 font-extrabold text-sm block">How is the cash remittance calculated?</strong>
+            <p class="mt-1 text-stone-600 leading-relaxed">
+                From total cash collected (<strong>₱{{ number_format($cashCollected, 2) }}</strong>), subtract your commission (<strong>{{ $staffProfile->commission_rate }}%</strong>). The remaining balance to turn in to the shop is <strong class="text-emerald-900 font-black">₱{{ number_format($cashToRemitToShop, 2) }}</strong>.
             </p>
             @if($qrCommissionOwedToStaff > 0)
-                <p class="mt-1 text-emerald-800 font-bold">
+                <p class="mt-1.5 text-emerald-800 font-bold">
                     You also have PayMongo QR earnings (₱{{ number_format($qrCommissionOwedToStaff, 2) }} commission) deposited directly to the shop account.
                 </p>
             @endif
