@@ -12,13 +12,17 @@ class StaffTrackerController extends Controller
 {
     public function index(Request $request)
     {
+        $user = Auth::user();
+
+        // Only Admin can view all employee commissions and overall tracker
+        if (!$user || $user->role !== 'admin') {
+            return redirect()->route('wallet.index')->with('info', 'Employees can view their personal earnings in My Wallet.');
+        }
+
         $selectedDate = $request->input('date', Carbon::today()->format('Y-m-d'));
         $targetDate = Carbon::parse($selectedDate);
-
-        // If logged in as staff and not admin, focus on their own profile
-        $user = Auth::user();
-        $isStaffUser = $user && $user->role === 'staff';
-        $currentStaffProfile = $isStaffUser ? StaffProfile::where('user_id', $user->id)->first() : null;
+        $isStaffUser = false;
+        $currentStaffProfile = null;
 
         $staffList = StaffProfile::where('is_active', true)
             ->with(['transactionItems' => function ($q) use ($targetDate) {
@@ -45,7 +49,16 @@ class StaffTrackerController extends Controller
 
     public function showDetails($id, Request $request)
     {
+        $user = Auth::user();
         $staff = StaffProfile::findOrFail($id);
+
+        // Non-admins can only view their own profile breakdown
+        if ($user && $user->role !== 'admin') {
+            if (!$user->staffProfile || $user->staffProfile->id != $id) {
+                return redirect()->route('wallet.index')->with('info', 'Employees can view their personal earnings in My Wallet.');
+            }
+        }
+
         $selectedDate = $request->input('date', Carbon::today()->format('Y-m-d'));
         $targetDate = Carbon::parse($selectedDate);
 

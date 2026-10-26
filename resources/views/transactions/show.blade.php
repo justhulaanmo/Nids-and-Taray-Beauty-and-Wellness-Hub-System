@@ -95,8 +95,10 @@
                                         {{ $item->service->name ?? 'Service' }}
                                     </td>
                                     <td class="py-3 px-3">
-                                        <span class="font-extrabold text-emerald-800">{{ $item->staff->nickname ?? 'Staff' }}</span>
-                                        <span class="text-[10px] text-stone-400 block">{{ $item->commission_rate }}% share (₱{{ number_format($item->staff_commission_amount, 2) }})</span>
+                                        <span class="font-extrabold text-emerald-800">{{ $item->staff->nickname ?? 'Attendant' }}</span>
+                                        @if(Auth::user()->role === 'admin' || (Auth::user()->staffProfile && Auth::user()->staffProfile->id === $item->staff_id))
+                                            <span class="text-[10px] text-stone-400 block">{{ $item->commission_rate }}% share (₱{{ number_format($item->staff_commission_amount, 2) }})</span>
+                                        @endif
                                     </td>
                                     <td class="py-3 px-3 text-right font-black text-emerald-800">
                                         ₱{{ number_format($item->price, 2) }}
