@@ -114,30 +114,61 @@
 
                         <div class="space-y-2">
                             @foreach($cat->services as $srv)
-                                <div class="p-3 rounded-2xl bg-stone-50/60 border border-stone-200/60 hover:border-emerald-300 hover:bg-emerald-50/30 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                                    <label class="flex items-start space-x-2.5 cursor-pointer">
+                                <div id="service_row_{{ $srv->id }}" class="p-3 sm:p-3.5 rounded-2xl bg-stone-50/60 border border-stone-200/80 hover:border-emerald-300 hover:bg-emerald-50/30 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                    <label class="flex items-start space-x-2.5 cursor-pointer flex-1 min-w-0">
                                         <input type="checkbox" name="services[{{ $srv->id }}][service_id]" value="{{ $srv->id }}" 
                                             data-price="{{ $srv->price }}" onchange="toggleServiceRow({{ $srv->id }})" 
-                                            class="srv-checkbox rounded-sm text-emerald-700 focus:ring-emerald-500 w-4 h-4 mt-0.5">
-                                        <div>
-                                            <span class="font-extrabold text-stone-900 text-xs block">{{ $srv->name }}</span>
-                                            <span class="text-[10px] text-stone-500">{{ $srv->estimated_duration_minutes }} mins</span>
+                                            class="srv-checkbox rounded-md text-emerald-700 focus:ring-emerald-500 w-4 h-4 mt-0.5 border-stone-300">
+                                        <div class="min-w-0">
+                                            <span class="font-extrabold text-stone-900 text-xs sm:text-sm block truncate">{{ $srv->name }}</span>
+                                            <span class="text-[10px] text-stone-500 flex items-center space-x-1 mt-0.5">
+                                                <i data-lucide="clock" class="w-3 h-3 text-stone-400"></i>
+                                                <span>{{ $srv->estimated_duration_minutes }} mins</span>
+                                            </span>
                                         </div>
                                     </label>
 
-                                    <div class="flex items-center space-x-3 self-end sm:self-center">
-                                        <span class="text-xs font-black text-emerald-800">₱{{ number_format($srv->price, 2) }}</span>
+                                    <div class="flex items-center space-x-3 self-end sm:self-center flex-shrink-0">
+                                        <span class="text-xs sm:text-sm font-black text-emerald-800">₱{{ number_format($srv->price, 2) }}</span>
 
-                                        <div class="w-44">
+                                        <!-- Custom Themed Staff Dropdown -->
+                                        <div class="relative w-56 sm:w-64">
+                                            <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-emerald-700">
+                                                <i data-lucide="user-check" class="w-3.5 h-3.5"></i>
+                                            </div>
+
                                             <select name="services[{{ $srv->id }}][staff_id]" id="staff_select_{{ $srv->id }}" disabled
-                                                class="staff-select w-full px-2 py-1.5 text-xs rounded-xl bg-white border border-stone-200 text-stone-800 disabled:opacity-40 font-medium">
-                                                <option value="">-- Select Staff --</option>
-                                                @foreach($staffList as $staff)
-                                                    <option value="{{ $staff->id }}" {{ (isset($myStaffProfile) && $myStaffProfile->id == $staff->id) ? 'selected' : '' }}>
-                                                        {{ $staff->nickname ?? $staff->name }} ({{ $staff->status === 'available' ? 'Queue #' . $staff->queue_position : ucfirst(str_replace('_', ' ', $staff->status)) }})
-                                                    </option>
-                                                @endforeach
+                                                class="staff-select w-full pl-8 pr-8 py-2 text-xs font-bold rounded-xl bg-white border-2 border-stone-200 text-stone-700 shadow-2xs appearance-none transition-all duration-200 focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 disabled:bg-stone-100/80 disabled:border-stone-200 disabled:text-stone-400 disabled:shadow-none disabled:cursor-not-allowed">
+                                                <option value="">-- Assign Attendant --</option>
+                                                
+                                                @if(isset($availableStaff) && $availableStaff->isNotEmpty())
+                                                    <optgroup label="🟢 AVAILABLE IN QUEUE (Priority Turn)" class="font-black text-emerald-900 bg-emerald-50 py-1">
+                                                        @foreach($availableStaff as $idx => $staff)
+                                                            @php
+                                                                $turn = $idx + 1;
+                                                                $isSelected = (isset($myStaffProfile) && $myStaffProfile->id == $staff->id) || (!isset($myStaffProfile) && $turn === 1);
+                                                            @endphp
+                                                            <option value="{{ $staff->id }}" {{ $isSelected ? 'selected' : '' }} class="text-stone-900 font-bold py-1.5 bg-white">
+                                                                {{ $turn === 1 ? '⭐ Turn #1 [NEXT UP]' : 'Turn #' . $turn }} &bull; {{ $staff->nickname ?? $staff->name }} ({{ ucfirst(str_replace('_', ' ', $staff->specialization)) }})
+                                                            </option>
+                                                        @endforeach
+                                                    </optgroup>
+                                                @endif
+
+                                                @if(isset($busyStaff) && $busyStaff->isNotEmpty())
+                                                    <optgroup label="⚠️ BUSY / ON BREAK / OFF DUTY" class="font-bold text-amber-900 bg-amber-50/70 py-1">
+                                                        @foreach($busyStaff as $staff)
+                                                            <option value="{{ $staff->id }}" {{ (isset($myStaffProfile) && $myStaffProfile->id == $staff->id) ? 'selected' : '' }} class="text-stone-500 font-normal py-1 bg-stone-50">
+                                                                ⏳ {{ $staff->nickname ?? $staff->name }} ({{ ucfirst(str_replace('_', ' ', $staff->status)) }})
+                                                            </option>
+                                                        @endforeach
+                                                    </optgroup>
+                                                @endif
                                             </select>
+
+                                            <div class="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none text-emerald-700">
+                                                <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -254,15 +285,39 @@
     function toggleServiceRow(srvId) {
         const cb = document.querySelector(`input[value="${srvId}"]`);
         const sel = document.getElementById(`staff_select_${srvId}`);
+        const row = document.getElementById(`service_row_${srvId}`);
+
         if (cb.checked) {
             sel.disabled = false;
             sel.required = true;
+            sel.classList.remove('border-stone-200', 'bg-stone-100/80', 'text-stone-400');
+            sel.classList.add('border-emerald-500', 'bg-white', 'text-stone-900', 'shadow-xs', 'ring-1', 'ring-emerald-400/20');
+            if (row) {
+                row.classList.remove('bg-stone-50/60', 'border-stone-200/80');
+                row.classList.add('bg-emerald-50/50', 'border-emerald-400', 'ring-1', 'ring-emerald-300/40', 'shadow-2xs');
+            }
+            // Auto-select the first available staff (Turn #1) if none selected yet
+            if (!sel.value) {
+                const firstAvailableOpt = sel.querySelector('optgroup option');
+                if (firstAvailableOpt) {
+                    sel.value = firstAvailableOpt.value;
+                }
+            }
         } else {
             sel.disabled = true;
             sel.required = false;
             sel.value = "";
+            sel.classList.add('border-stone-200', 'bg-stone-100/80', 'text-stone-400');
+            sel.classList.remove('border-emerald-500', 'bg-white', 'text-stone-900', 'shadow-xs', 'ring-1', 'ring-emerald-400/20');
+            if (row) {
+                row.classList.add('bg-stone-50/60', 'border-stone-200/80');
+                row.classList.remove('bg-emerald-50/50', 'border-emerald-400', 'ring-1', 'ring-emerald-300/40', 'shadow-2xs');
+            }
         }
         calculateTotal();
+        if (window.lucide) {
+            lucide.createIcons();
+        }
     }
 
     function calculateTotal() {

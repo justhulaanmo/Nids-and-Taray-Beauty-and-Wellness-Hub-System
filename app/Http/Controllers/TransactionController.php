@@ -44,14 +44,23 @@ class TransactionController extends Controller
             ->orderBy('display_order')
             ->get();
 
-        $staffList = StaffProfile::where('is_active', true)
-            ->orderByRaw("CASE status WHEN 'available' THEN 1 WHEN 'serving_in_shop' THEN 2 WHEN 'on_home_service' THEN 3 WHEN 'on_break' THEN 4 ELSE 5 END")
-            ->orderBy('queue_position')
+        // 1. Strictly prioritize Available staff sorted by fair queue position (Turn #1, #2, etc.)
+        $availableStaff = StaffProfile::where('is_active', true)
+            ->where('status', 'available')
+            ->orderBy('queue_position', 'asc')
             ->get();
 
+        // 2. Staff currently busy, on home service, on break, or off duty
+        $busyStaff = StaffProfile::where('is_active', true)
+            ->where('status', '!=', 'available')
+            ->orderByRaw("CASE status WHEN 'serving_in_shop' THEN 1 WHEN 'on_home_service' THEN 2 WHEN 'on_break' THEN 3 ELSE 4 END")
+            ->orderBy('queue_position', 'asc')
+            ->get();
+
+        $staffList = $availableStaff->concat($busyStaff);
         $myStaffProfile = StaffProfile::where('user_id', Auth::id())->first();
 
-        return view('transactions.create', compact('categories', 'staffList', 'myStaffProfile'));
+        return view('transactions.create', compact('categories', 'staffList', 'availableStaff', 'busyStaff', 'myStaffProfile'));
     }
 
     public function store(Request $request, PayMongoService $payMongo)

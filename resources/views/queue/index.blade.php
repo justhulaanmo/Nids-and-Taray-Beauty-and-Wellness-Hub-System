@@ -379,7 +379,7 @@
                                 <form action="{{ route('queue.update-status', $staff->id) }}" method="POST" class="inline-flex items-center space-x-1">
                                     @csrf
                                     @method('PATCH')
-                                    <select name="status" onchange="this.form.submit()" class="text-[10px] font-semibold py-1 px-2 rounded-lg border border-stone-200 bg-white text-stone-700 focus:outline-none focus:ring-1 focus:ring-emerald-600 cursor-pointer">
+                                    <select name="status" onchange="this.form.submit()" class="text-[10px] font-bold py-1 px-2.5 rounded-lg border-2 border-emerald-300 bg-white text-emerald-950 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 shadow-2xs hover:border-emerald-400 cursor-pointer transition">
                                         <option value="available" {{ $staff->status === 'available' ? 'selected' : '' }}>Available (Ready)</option>
                                         <option value="serving_in_shop" {{ $staff->status === 'serving_in_shop' ? 'selected' : '' }}>Serving In-Shop</option>
                                         <option value="on_home_service" {{ $staff->status === 'on_home_service' ? 'selected' : '' }}>Home Service</option>
