@@ -84,9 +84,9 @@
     @endphp
 
     <!-- Subtle Luxury Spa Background Wallpaper Layer (Adaptive to Admin vs Employee) -->
-    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-30 select-none">
-        <img src="{{ $bgImage }}" alt="" class="w-full h-full object-cover filter blur-[2px] scale-105">
-        <div class="absolute inset-0 bg-[#f6f9f6]/80 mix-blend-screen"></div>
+    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none">
+        <img src="{{ $bgImage }}" alt="" class="w-full h-full object-cover filter brightness-[0.96] contrast-[1.02] scale-105">
+        <div class="absolute inset-0 bg-[#f6f9f6]/88 backdrop-blur-[1px]"></div>
     </div>
 
     <!-- Mobile Top Bar (Visible only on small screens) -->
@@ -215,24 +215,35 @@
         <!-- Bottom User Profile Card & Logout -->
         <div class="p-3 border-t border-stone-100 bg-stone-50/70">
             <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-2.5 min-w-0">
-                    <div class="w-8 h-8 rounded-full bg-emerald-100 border border-emerald-200 text-emerald-800 font-bold text-xs flex items-center justify-center flex-shrink-0">
+                <a href="{{ route('profile.show') }}" class="flex items-center space-x-2.5 min-w-0 hover:opacity-85 transition group flex-1 mr-1" title="Account Settings">
+                    <div class="w-8 h-8 rounded-full bg-emerald-100 border border-emerald-200 text-emerald-800 font-bold text-xs flex items-center justify-center flex-shrink-0 group-hover:ring-2 group-hover:ring-emerald-400">
                         {{ strtoupper(substr(Auth::user()->name ?? 'U', 0, 1)) }}
                     </div>
                     <div class="truncate">
-                        <div class="text-xs font-bold text-stone-900 truncate">{{ Auth::user()->name ?? 'User' }}</div>
-                        <div class="text-[10px] font-semibold text-emerald-800 uppercase tracking-wider">
-                            {{ Auth::user()->role === 'admin' ? 'Administrator' : 'Employee' }}
+                        <div class="text-xs font-bold text-stone-900 truncate group-hover:text-emerald-800">{{ Auth::user()->name ?? 'User' }}</div>
+                        <div class="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">
+                            @if(Auth::user()->role === 'admin')
+                                Administrator
+                            @elseif(Auth::user()->staffProfile && Auth::user()->staffProfile->specialization)
+                                {{ strtoupper(str_replace('_', ' ', Auth::user()->staffProfile->specialization)) }}
+                            @else
+                                Employee
+                            @endif
                         </div>
                     </div>
-                </div>
+                </a>
 
-                <form action="{{ route('logout') }}" method="POST" class="inline">
-                    @csrf
-                    <button type="submit" class="p-1.5 rounded-lg text-stone-400 hover:text-rose-600 hover:bg-rose-50 transition" title="Log out" aria-label="Log out">
-                        <i data-lucide="log-out" class="w-4 h-4"></i>
-                    </button>
-                </form>
+                <div class="flex items-center space-x-0.5">
+                    <a href="{{ route('profile.show') }}" class="p-1.5 rounded-lg text-stone-400 hover:text-emerald-800 hover:bg-emerald-50 transition" title="Account Settings" aria-label="Account Settings">
+                        <i data-lucide="settings" class="w-4 h-4"></i>
+                    </a>
+                    <form action="{{ route('logout') }}" method="POST" class="inline">
+                        @csrf
+                        <button type="submit" class="p-1.5 rounded-lg text-stone-400 hover:text-rose-600 hover:bg-rose-50 transition" title="Log out" aria-label="Log out">
+                            <i data-lucide="log-out" class="w-4 h-4"></i>
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </aside>

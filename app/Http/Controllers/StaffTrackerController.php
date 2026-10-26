@@ -72,4 +72,36 @@ class StaffTrackerController extends Controller
 
         return view('staff-tracker.show', compact('staff', 'items', 'selectedDate'));
     }
+
+    public function updateEmployeeRole(Request $request, $id)
+    {
+        $user = Auth::user();
+        if (!$user || $user->role !== 'admin') {
+            abort(403, 'Only Administrators can update employee roles.');
+        }
+
+        $staff = StaffProfile::findOrFail($id);
+
+        $validated = $request->validate([
+            'specialization' => 'required|in:manicurist,massage_therapist,all_around',
+            'commission_rate' => 'required|numeric|min:0|max:100',
+            'nickname' => 'required|string|max:50',
+            'role' => 'required|in:staff,admin',
+            'is_active' => 'required|boolean',
+        ]);
+
+        $staff->specialization = $validated['specialization'];
+        $staff->commission_rate = $validated['commission_rate'];
+        $staff->nickname = $validated['nickname'];
+        $staff->is_active = $validated['is_active'];
+        $staff->save();
+
+        if ($staff->user) {
+            $staff->user->role = $validated['role'];
+            $staff->user->is_active = $validated['is_active'];
+            $staff->user->save();
+        }
+
+        return back()->with('success', "Updated {$staff->nickname}'s role to " . ucwords(str_replace('_', ' ', $staff->specialization)) . " successfully.");
+    }
 }

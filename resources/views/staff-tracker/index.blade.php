@@ -114,7 +114,7 @@
                 <!-- Footer Link -->
                 <div class="pt-2 border-t border-stone-100">
                     <a href="{{ route('staff-tracker.show', ['id' => $staff->id, 'date' => $selectedDate]) }}" class="w-full py-2 px-3 bg-stone-50 hover:bg-emerald-700 hover:text-white text-stone-700 border border-stone-200 font-bold text-xs rounded-xl flex items-center justify-center space-x-1.5 transition">
-                        <span>View Details</span>
+                        <span>Manage Role & Activity</span>
                         <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
                     </a>
                 </div>

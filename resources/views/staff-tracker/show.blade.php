@@ -47,6 +47,70 @@
         </div>
     </div>
 
+    @if(Auth::user()->role === 'admin')
+        <!-- Admin Employee Role & Specialization Manager -->
+        <div class="bg-white rounded-3xl border border-stone-200/80 p-5 shadow-2xs space-y-4">
+            <div class="flex items-center justify-between border-b border-stone-100 pb-2.5">
+                <h2 class="text-xs sm:text-sm font-black uppercase tracking-wider text-stone-900 flex items-center space-x-2">
+                    <i data-lucide="shield-check" class="w-4 h-4 text-emerald-800"></i>
+                    <span>Manage Employee Role, Specialization & Commission</span>
+                </h2>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">Admin Control</span>
+            </div>
+
+            <form action="{{ route('staff-tracker.update-role', $staff->id) }}" method="POST" class="space-y-4">
+                @csrf
+                @method('PATCH')
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-bold text-stone-700 uppercase tracking-wider mb-1">Display Nickname</label>
+                        <input type="text" name="nickname" value="{{ old('nickname', $staff->nickname) }}" required
+                            class="w-full px-3 py-2 rounded-xl bg-stone-50 border border-stone-200 text-xs font-bold text-stone-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600">
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold text-stone-700 uppercase tracking-wider mb-1">Specialization / Role</label>
+                        <select name="specialization" required
+                            class="w-full px-3 py-2 rounded-xl bg-stone-50 border border-stone-200 text-xs font-bold text-stone-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600">
+                            <option value="manicurist" {{ $staff->specialization === 'manicurist' ? 'selected' : '' }}>Manicurist</option>
+                            <option value="massage_therapist" {{ $staff->specialization === 'massage_therapist' ? 'selected' : '' }}>Massage Therapist</option>
+                            <option value="all_around" {{ $staff->specialization === 'all_around' ? 'selected' : '' }}>All-Around</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold text-stone-700 uppercase tracking-wider mb-1">Commission Rate (%)</label>
+                        <input type="number" step="0.01" min="0" max="100" name="commission_rate" value="{{ old('commission_rate', $staff->commission_rate) }}" required
+                            class="w-full px-3 py-2 rounded-xl bg-stone-50 border border-stone-200 text-xs font-bold text-stone-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600">
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold text-stone-700 uppercase tracking-wider mb-1">System Account Role</label>
+                        <select name="role" required
+                            class="w-full px-3 py-2 rounded-xl bg-stone-50 border border-stone-200 text-xs font-bold text-stone-900 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600">
+                            <option value="staff" {{ ($staff->user && $staff->user->role === 'staff') ? 'selected' : '' }}>Employee (Staff)</option>
+                            <option value="admin" {{ ($staff->user && $staff->user->role === 'admin') ? 'selected' : '' }}>Administrator</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between pt-1">
+                    <label class="inline-flex items-center space-x-2 text-xs font-bold text-stone-700 cursor-pointer">
+                        <input type="hidden" name="is_active" value="0">
+                        <input type="checkbox" name="is_active" value="1" {{ $staff->is_active ? 'checked' : '' }} class="w-4 h-4 rounded text-emerald-700 focus:ring-emerald-500 border-stone-300">
+                        <span>Active Employee in Queue Rotation</span>
+                    </label>
+
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs transition inline-flex items-center space-x-1.5 active:scale-[0.98]">
+                        <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                        <span>Save Employee Role & Rate</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    @endif
+
     <!-- Service Records Table -->
     <div class="bg-white rounded-2xl border border-emerald-900/10 shadow-xs overflow-hidden">
         <div class="p-5 border-b border-stone-100 flex items-center justify-between">

@@ -94,4 +94,32 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
         return redirect()->route('login')->with('info', 'You have been logged out successfully.');
     }
+
+    public function showForgotPassword()
+    {
+        if (Auth::check()) {
+            return redirect()->route('dashboard');
+        }
+        return view('auth.forgot-password');
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email|exists:users,email',
+            'password' => 'required|string|min:6|confirmed',
+        ], [
+            'email.exists' => 'No employee account found with this email address.',
+        ]);
+
+        $user = User::where('email', $validated['email'])->first();
+        if (!$user) {
+            return back()->withErrors(['email' => 'Account not found.'])->onlyInput('email');
+        }
+
+        $user->password = Hash::make($validated['password']);
+        $user->save();
+
+        return redirect()->route('login')->with('success', 'Password reset successfully! You can now log in with your new password.');
+    }
 }

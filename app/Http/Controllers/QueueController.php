@@ -51,6 +51,18 @@ class QueueController extends Controller
         ]);
 
         $newStatus = $request->input('status');
+        $user = \Illuminate\Support\Facades\Auth::user();
+
+        // Non-admin authorization check
+        if ($user && $user->role !== 'admin') {
+            $isOwnProfile = $user->staffProfile && $user->staffProfile->id == $staff->id;
+            if (!$isOwnProfile) {
+                return back()->with('error', 'Only Administrators can change attendant statuses.');
+            }
+            if (!in_array($newStatus, ['available', 'on_break'])) {
+                return back()->with('error', 'Only Administrators can assign attendants to In-Shop or Home Service.');
+            }
+        }
         
         // If moving back to available, put them at the end of the available queue for fairness
         if ($newStatus === 'available' && $staff->status !== 'available') {
@@ -67,6 +79,11 @@ class QueueController extends Controller
 
     public function moveQueue(Request $request, $id, $direction)
     {
+        $user = \Illuminate\Support\Facades\Auth::user();
+        if (!$user || $user->role !== 'admin') {
+            return back()->with('error', 'Only Administrators can reorder the queue.');
+        }
+
         $staff = StaffProfile::findOrFail($id);
         
         if ($direction === 'up' && $staff->queue_position > 1) {

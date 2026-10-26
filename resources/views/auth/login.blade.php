@@ -75,7 +75,12 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1.5">Password</label>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider">Password</label>
+                        <a href="{{ route('password.request') }}" class="text-[11px] font-bold text-emerald-800 hover:text-emerald-950 hover:underline">
+                            Forgot password?
+                        </a>
+                    </div>
                     <div class="relative">
                         <i data-lucide="lock" class="w-4 h-4 text-stone-400 absolute left-3.5 top-3.5"></i>
                         <input type="password" name="password" id="password" value="admin123" required 

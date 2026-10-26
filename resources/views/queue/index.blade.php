@@ -126,37 +126,43 @@
                                     </div>
                                 @endif
 
-                                <!-- 1-Tap Quick Status Buttons (Dense) -->
-                                <div class="flex items-center space-x-1">
-                                    <form action="{{ route('queue.update-status', $staff->id) }}" method="POST" class="inline">
-                                        @csrf
-                                        @method('PATCH')
-                                        <input type="hidden" name="status" value="serving_in_shop">
-                                        <button type="submit" class="px-2 py-1 rounded-md bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200/80 font-bold text-[10px] transition inline-flex items-center space-x-1" title="Set to Serving In-Shop">
-                                            <i data-lucide="store" class="w-3 h-3 text-teal-700"></i>
-                                            <span class="hidden sm:inline">In-Shop</span>
-                                        </button>
-                                    </form>
+                                <!-- Dispatch Actions: Admin Only; Employees View Only -->
+                                @if(Auth::user()->role === 'admin')
+                                    <div class="flex items-center space-x-1">
+                                        <form action="{{ route('queue.update-status', $staff->id) }}" method="POST" class="inline">
+                                            @csrf
+                                            @method('PATCH')
+                                            <input type="hidden" name="status" value="serving_in_shop">
+                                            <button type="submit" class="px-2 py-1 rounded-md bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200/80 font-bold text-[10px] transition inline-flex items-center space-x-1" title="Set to Serving In-Shop">
+                                                <i data-lucide="store" class="w-3 h-3 text-teal-700"></i>
+                                                <span class="hidden sm:inline">In-Shop</span>
+                                            </button>
+                                        </form>
 
-                                    <form action="{{ route('queue.update-status', $staff->id) }}" method="POST" class="inline">
-                                        @csrf
-                                        @method('PATCH')
-                                        <input type="hidden" name="status" value="on_home_service">
-                                        <button type="submit" class="px-2 py-1 rounded-md bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200/80 font-bold text-[10px] transition inline-flex items-center space-x-1" title="Set to Out on Home Service">
-                                            <i data-lucide="home" class="w-3 h-3 text-sky-700"></i>
-                                            <span class="hidden sm:inline">Home Svc</span>
-                                        </button>
-                                    </form>
+                                        <form action="{{ route('queue.update-status', $staff->id) }}" method="POST" class="inline">
+                                            @csrf
+                                            @method('PATCH')
+                                            <input type="hidden" name="status" value="on_home_service">
+                                            <button type="submit" class="px-2 py-1 rounded-md bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200/80 font-bold text-[10px] transition inline-flex items-center space-x-1" title="Set to Out on Home Service">
+                                                <i data-lucide="home" class="w-3 h-3 text-sky-700"></i>
+                                                <span class="hidden sm:inline">Home Svc</span>
+                                            </button>
+                                        </form>
 
-                                    <form action="{{ route('queue.update-status', $staff->id) }}" method="POST" class="inline">
-                                        @csrf
-                                        @method('PATCH')
-                                        <input type="hidden" name="status" value="on_break">
-                                        <button type="submit" class="px-1.5 py-1 rounded-md bg-stone-100 hover:bg-amber-100 text-stone-600 hover:text-amber-800 font-bold text-[10px] transition inline-flex items-center" title="Send to Break">
-                                            <i data-lucide="coffee" class="w-3 h-3"></i>
-                                        </button>
-                                    </form>
-                                </div>
+                                        <form action="{{ route('queue.update-status', $staff->id) }}" method="POST" class="inline">
+                                            @csrf
+                                            @method('PATCH')
+                                            <input type="hidden" name="status" value="on_break">
+                                            <button type="submit" class="px-1.5 py-1 rounded-md bg-stone-100 hover:bg-amber-100 text-stone-600 hover:text-amber-800 font-bold text-[10px] transition inline-flex items-center" title="Send to Break">
+                                                <i data-lucide="coffee" class="w-3 h-3"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                @else
+                                    <span class="text-[10px] px-2.5 py-1 rounded-lg font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                        Ready
+                                    </span>
+                                @endif
 
                             </div>
                         </div>
@@ -190,15 +196,21 @@
                                 <span class="font-bold text-stone-900 block truncate">{{ $staff->nickname ?? $staff->name }}</span>
                                 <span class="text-[10px] text-teal-700 font-medium capitalize">{{ str_replace('_', ' ', $staff->specialization) }}</span>
                             </div>
-                            <form action="{{ route('queue.update-status', $staff->id) }}" method="POST" class="flex-shrink-0">
-                                @csrf
-                                @method('PATCH')
-                                <input type="hidden" name="status" value="available">
-                                <button type="submit" class="px-2.5 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-[10px] shadow-2xs transition inline-flex items-center space-x-1">
-                                    <i data-lucide="check" class="w-3 h-3"></i>
-                                    <span>Finish &bull; Requeue</span>
-                                </button>
-                            </form>
+                            @if(Auth::user()->role === 'admin')
+                                <form action="{{ route('queue.update-status', $staff->id) }}" method="POST" class="flex-shrink-0">
+                                    @csrf
+                                    @method('PATCH')
+                                    <input type="hidden" name="status" value="available">
+                                    <button type="submit" class="px-2.5 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-[10px] shadow-2xs transition inline-flex items-center space-x-1">
+                                        <i data-lucide="check" class="w-3 h-3"></i>
+                                        <span>Finish &bull; Requeue</span>
+                                    </button>
+                                </form>
+                            @else
+                                <span class="text-[10px] px-2 py-0.5 rounded-md font-bold bg-teal-100 text-teal-800 border border-teal-200">
+                                    Serving
+                                </span>
+                            @endif
                         </div>
                     @empty
                         <div class="p-3 text-center text-[11px] text-stone-400">
@@ -230,15 +242,21 @@
                                 <span class="font-bold text-stone-900 block truncate">{{ $staff->nickname ?? $staff->name }}</span>
                                 <span class="text-[10px] text-sky-700 font-medium capitalize">{{ str_replace('_', ' ', $staff->specialization) }}</span>
                             </div>
-                            <form action="{{ route('queue.update-status', $staff->id) }}" method="POST" class="flex-shrink-0">
-                                @csrf
-                                @method('PATCH')
-                                <input type="hidden" name="status" value="available">
-                                <button type="submit" class="px-2.5 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-[10px] shadow-2xs transition inline-flex items-center space-x-1">
-                                    <i data-lucide="check" class="w-3 h-3"></i>
-                                    <span>Returned &bull; Requeue</span>
-                                </button>
-                            </form>
+                            @if(Auth::user()->role === 'admin')
+                                <form action="{{ route('queue.update-status', $staff->id) }}" method="POST" class="flex-shrink-0">
+                                    @csrf
+                                    @method('PATCH')
+                                    <input type="hidden" name="status" value="available">
+                                    <button type="submit" class="px-2.5 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-[10px] shadow-2xs transition inline-flex items-center space-x-1">
+                                        <i data-lucide="check" class="w-3 h-3"></i>
+                                        <span>Returned &bull; Requeue</span>
+                                    </button>
+                                </form>
+                            @else
+                                <span class="text-[10px] px-2 py-0.5 rounded-md font-bold bg-sky-100 text-sky-800 border border-sky-200">
+                                    Home Svc
+                                </span>
+                            @endif
                         </div>
                     @empty
                         <div class="p-3 text-center text-[11px] text-stone-400">
@@ -272,15 +290,21 @@
                                 </div>
                                 <span class="text-[10px] text-stone-400 capitalize">{{ str_replace('_', ' ', $staff->specialization) }}</span>
                             </div>
-                            <form action="{{ route('queue.update-status', $staff->id) }}" method="POST" class="flex-shrink-0">
-                                @csrf
-                                @method('PATCH')
-                                <input type="hidden" name="status" value="available">
-                                <button type="submit" class="px-2.5 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-[10px] shadow-2xs transition inline-flex items-center space-x-1">
-                                    <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
-                                    <span>Set Ready</span>
-                                </button>
-                            </form>
+                            @if(Auth::user()->role === 'admin')
+                                <form action="{{ route('queue.update-status', $staff->id) }}" method="POST" class="flex-shrink-0">
+                                    @csrf
+                                    @method('PATCH')
+                                    <input type="hidden" name="status" value="available">
+                                    <button type="submit" class="px-2.5 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-[10px] shadow-2xs transition inline-flex items-center space-x-1">
+                                        <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+                                        <span>Set Ready</span>
+                                    </button>
+                                </form>
+                            @else
+                                <span class="text-[10px] px-2 py-0.5 rounded-md font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                                    {{ $staff->status === 'on_break' ? 'On Break' : 'Off-Duty' }}
+                                </span>
+                            @endif
                         </div>
                     @empty
                         <div class="p-3 text-center text-[11px] text-stone-400">
@@ -317,7 +341,9 @@
                         <th class="py-2.5 px-3">Specialization</th>
                         <th class="py-2.5 px-3">Current Status</th>
                         <th class="py-2.5 px-3 text-center">Served Today</th>
-                        <th class="py-2.5 px-3 text-right">Quick Action</th>
+                        @if(Auth::user()->role === 'admin')
+                            <th class="py-2.5 px-3 text-right">Quick Action</th>
+                        @endif
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-stone-100">
@@ -368,20 +394,22 @@
                                 {{ $staff->customers_served_today }}
                             </td>
 
-                            <!-- Quick Action Form -->
-                            <td class="py-2.5 px-3 text-right">
-                                <form action="{{ route('queue.update-status', $staff->id) }}" method="POST" class="inline-flex items-center space-x-1">
-                                    @csrf
-                                    @method('PATCH')
-                                    <select name="status" onchange="this.form.submit()" class="text-[10px] font-bold py-1 px-2.5 rounded-lg border-2 border-emerald-300 bg-white text-emerald-950 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 shadow-2xs hover:border-emerald-400 cursor-pointer transition">
-                                        <option value="available" {{ $staff->status === 'available' ? 'selected' : '' }}>Available (Ready)</option>
-                                        <option value="serving_in_shop" {{ $staff->status === 'serving_in_shop' ? 'selected' : '' }}>Serving In-Shop</option>
-                                        <option value="on_home_service" {{ $staff->status === 'on_home_service' ? 'selected' : '' }}>Home Service</option>
-                                        <option value="on_break" {{ $staff->status === 'on_break' ? 'selected' : '' }}>On Break</option>
-                                        <option value="off_duty" {{ $staff->status === 'off_duty' ? 'selected' : '' }}>Off Duty</option>
-                                    </select>
-                                </form>
-                            </td>
+                            <!-- Quick Action Form (Admin Only) -->
+                            @if(Auth::user()->role === 'admin')
+                                <td class="py-2.5 px-3 text-right">
+                                    <form action="{{ route('queue.update-status', $staff->id) }}" method="POST" class="inline-flex items-center space-x-1">
+                                        @csrf
+                                        @method('PATCH')
+                                        <select name="status" onchange="this.form.submit()" class="text-[10px] font-bold py-1 px-2.5 rounded-lg border-2 border-emerald-300 bg-white text-emerald-950 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 shadow-2xs hover:border-emerald-400 cursor-pointer transition">
+                                            <option value="available" {{ $staff->status === 'available' ? 'selected' : '' }}>Available (Ready)</option>
+                                            <option value="serving_in_shop" {{ $staff->status === 'serving_in_shop' ? 'selected' : '' }}>Serving In-Shop</option>
+                                            <option value="on_home_service" {{ $staff->status === 'on_home_service' ? 'selected' : '' }}>Home Service</option>
+                                            <option value="on_break" {{ $staff->status === 'on_break' ? 'selected' : '' }}>On Break</option>
+                                            <option value="off_duty" {{ $staff->status === 'off_duty' ? 'selected' : '' }}>Off Duty</option>
+                                        </select>
+                                    </form>
+                                </td>
+                            @endif
                         </tr>
                     @endforeach
                 </tbody>

@@ -16,6 +16,8 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->name('login.post');
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register'])->name('register.post');
+    Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('password.request');
+    Route::post('/forgot-password', [AuthController::class, 'resetPassword'])->name('password.update');
 });
 
 // Authenticated Routes
@@ -55,4 +57,10 @@ Route::middleware('auth')->group(function () {
     // 6. Overall Staff Tracker & Performance
     Route::get('/staff-tracker', [StaffTrackerController::class, 'index'])->name('staff-tracker.index');
     Route::get('/staff-tracker/{id}', [StaffTrackerController::class, 'showDetails'])->name('staff-tracker.show');
+    Route::patch('/staff-tracker/{id}/role', [StaffTrackerController::class, 'updateEmployeeRole'])->name('staff-tracker.update-role');
+
+    // 7. Employee & Admin Profile & Account Settings
+    Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
+    Route::patch('/profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+    Route::patch('/profile/password', [\App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('profile.password');
 });
