@@ -206,7 +206,7 @@
                         </h2>
                     </div>
                     <p class="text-[11px] text-stone-300 mt-1">
-                        Gross Sales &minus; Deductions (Commissions & Gateway Fees) = <strong class="text-emerald-300">Gross Profit</strong> &minus; Total OPEX (Rent, Bills, Supplies) = <strong class="text-emerald-200">True Net Profit</strong>.
+                        Gross Sales &minus; Deductions (Commissions & Gateway Fees) = <strong class="text-emerald-300">Gross Profit</strong> &minus; Shop Expenses (Rent, Bills, Supplies) = <strong class="text-emerald-200">True Net Profit (Tubo)</strong>.
                     </p>
                 </div>
 
@@ -263,11 +263,11 @@
                     <span class="text-[10px] text-stone-400 block mt-0.5">Shop share from sales</span>
                 </div>
 
-                <!-- 4. Total OPEX (Expenses) -->
+                <!-- 4. Shop Expenses (Rent & Bills) -->
                 <div class="p-3.5 bg-white/5 rounded-2xl border border-white/10">
-                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-rose-300 block">4. Total OPEX</span>
+                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-rose-300 block">4. Shop Expenses</span>
                     <span class="text-xl sm:text-2xl font-black text-rose-200 block mt-0.5">
-                        -₱{{ number_format($monthTotalOPEX, 2) }}
+                        -₱{{ number_format($monthTotalExpenses, 2) }}
                     </span>
                     <span class="text-[10px] text-stone-400 block mt-0.5">Rent, Bills, Supplies</span>
                 </div>
@@ -313,18 +313,18 @@
             </div>
         </div>
 
-        <!-- Monthly Operating Expenses (OPEX) List -->
+        <!-- Monthly Shop Expenses List -->
         <div class="bg-white rounded-3xl border border-stone-200 p-4 sm:p-5 shadow-2xs space-y-3">
             <div class="flex items-center justify-between border-b border-stone-100 pb-3">
                 <div class="flex items-center space-x-2">
                     <i data-lucide="receipt" class="w-4 h-4 text-emerald-800"></i>
                     <h3 class="text-xs font-black uppercase tracking-wider text-stone-900">
-                        Monthly Operating Expenses Log ({{ \Carbon\Carbon::parse($selectedMonth . '-01')->format('F Y') }})
+                        Monthly Shop Expenses Log ({{ \Carbon\Carbon::parse($selectedMonth . '-01')->format('F Y') }})
                     </h3>
                 </div>
                 <div class="flex items-center space-x-2">
-                    <span class="text-xs font-bold text-stone-600">Total OPEX:</span>
-                    <span class="text-sm font-black text-rose-700">₱{{ number_format($monthTotalOPEX, 2) }}</span>
+                    <span class="text-xs font-bold text-stone-600">Total Expenses:</span>
+                    <span class="text-sm font-black text-rose-700">₱{{ number_format($monthTotalExpenses, 2) }}</span>
                 </div>
             </div>
 

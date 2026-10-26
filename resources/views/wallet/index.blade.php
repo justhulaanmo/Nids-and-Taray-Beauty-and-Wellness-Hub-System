@@ -10,7 +10,7 @@
                 <i data-lucide="info" class="w-4 h-4 text-amber-700 shrink-0"></i>
                 <span class="text-amber-950 font-medium">
                     <strong class="font-bold text-amber-900">Administrator Notice:</strong>
-                    You are in "My Wallet" (personal attendant earnings). To view salon-wide sales, OPEX bills, and monthly profit reports:
+                    You are in "My Wallet" (personal attendant earnings). To view salon-wide sales, shop expenses (rent, bills, supplies), and monthly profit reports:
                 </span>
             </div>
             <a href="{{ route('dashboard') }}" class="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-black text-xs shadow-xs transition flex items-center space-x-1 shrink-0 self-start sm:self-auto">

@@ -138,7 +138,7 @@ class DashboardController extends Controller
     }
 
     /**
-     * Calculate Gross Sales, Deductions, OPEX, and True Net Profit for a month
+     * Calculate Gross Sales, Deductions, Shop Expenses, and True Net Profit for a month
      */
     private function getMonthlyFinancials(string $selectedMonth): array
     {
@@ -171,8 +171,8 @@ class DashboardController extends Controller
             ->latest('expense_date')
             ->get();
 
-        $monthTotalOPEX = (float) $monthExpensesList->sum('amount');
-        $monthTrueNetProfit = $monthGrossProfit - $monthTotalOPEX;
+        $monthTotalExpenses = (float) $monthExpensesList->sum('amount');
+        $monthTrueNetProfit = $monthGrossProfit - $monthTotalExpenses;
 
         return [
             'selectedMonth' => $selectedMonth,
@@ -182,7 +182,8 @@ class DashboardController extends Controller
             'monthTotalDeductions' => $monthTotalDeductions,
             'monthGrossProfit' => $monthGrossProfit,
             'monthExpensesList' => $monthExpensesList,
-            'monthTotalOPEX' => $monthTotalOPEX,
+            'monthTotalExpenses' => $monthTotalExpenses,
+            'monthTotalOPEX' => $monthTotalExpenses, // backwards compatibility
             'monthTrueNetProfit' => $monthTrueNetProfit,
         ];
     }
