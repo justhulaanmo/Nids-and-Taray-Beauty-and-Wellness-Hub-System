@@ -67,4 +67,5 @@ Route::middleware('auth')->group(function () {
     // 8. Payouts & Cashout (Shop Profit & Staff Commission)
     Route::post('/payouts/admin', [\App\Http\Controllers\PayoutController::class, 'storeAdminPayout'])->name('payouts.admin');
     Route::post('/payouts/staff', [\App\Http\Controllers\PayoutController::class, 'storeStaffPayout'])->name('payouts.staff');
+    Route::delete('/payouts/{id}/void', [\App\Http\Controllers\PayoutController::class, 'voidPayout'])->name('payouts.void');
 });

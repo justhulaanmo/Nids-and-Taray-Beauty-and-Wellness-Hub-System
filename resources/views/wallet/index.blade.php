@@ -198,6 +198,72 @@
         @endif
     </div>
 
+    <!-- Recent Cashout & Payout History -->
+    <div class="bg-white rounded-3xl border border-stone-200 shadow-xs overflow-hidden">
+        <div class="p-4 sm:p-5 border-b border-stone-100 flex items-center justify-between">
+            <div>
+                <h2 class="text-sm font-black text-stone-900 uppercase tracking-wider flex items-center space-x-1.5">
+                    <i data-lucide="history" class="w-4 h-4 text-emerald-800"></i>
+                    <span>Recent Cashout History</span>
+                </h2>
+                <p class="text-[11px] text-stone-500 font-medium mt-0.5">Disbursements dispatched to your GCash or Maya</p>
+            </div>
+            <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                PayMongo Disbursements
+            </span>
+        </div>
+
+        @if($staffPayouts->isEmpty())
+            <div class="p-6 text-center text-xs text-stone-400 space-y-1.5">
+                <i data-lucide="wallet-cards" class="w-7 h-7 text-stone-300 mx-auto"></i>
+                <div class="font-bold text-stone-700">No cashouts requested yet</div>
+                <div class="text-[11px]">When you request a commission cashout, it will appear here.</div>
+            </div>
+        @else
+            <div class="divide-y divide-stone-100">
+                @foreach($staffPayouts as $payout)
+                    <div class="p-4 hover:bg-stone-50 transition flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs">
+                        <div class="space-y-1">
+                            <div class="flex items-center space-x-2">
+                                <span class="font-mono font-bold text-stone-900 text-xs">#{{ $payout->reference_no }}</span>
+                                <span class="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-black {{ $payout->payout_method === 'maya' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-blue-50 text-blue-800 border border-blue-200' }}">
+                                    <span>{{ strtoupper($payout->payout_method) }}</span>
+                                </span>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-900">
+                                    {{ strtoupper($payout->status) }}
+                                </span>
+                            </div>
+                            <p class="text-stone-500">
+                                To: <strong class="text-stone-800">{{ $payout->account_name }}</strong> ({{ $payout->account_number }}) &bull; 
+                                <span class="text-stone-400">{{ $payout->created_at->format('M d, Y • h:i A') }}</span>
+                            </p>
+                            @if($payout->paymongo_payout_id)
+                                <div class="text-[10px] font-mono text-stone-400">
+                                    ID: {{ $payout->paymongo_payout_id }} &bull; Test Mode Dispatched
+                                </div>
+                            @endif
+                        </div>
+
+                        <div class="flex items-center sm:flex-col sm:items-end justify-between sm:justify-center gap-2">
+                            <span class="font-black text-stone-900 text-base">
+                                ₱{{ number_format($payout->gross_amount, 2) }}
+                            </span>
+                            <!-- Void / Reset for Testing Button -->
+                            <form action="{{ route('payouts.void', $payout->id) }}" method="POST" onsubmit="return confirm('Void this test payout and restore ₱{{ number_format($payout->gross_amount, 2) }} back to your available balance for testing?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-[10px] font-bold transition flex items-center space-x-1">
+                                    <i data-lucide="rotate-ccw" class="w-3 h-3 text-amber-700"></i>
+                                    <span>Void for Re-test</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @endif
+    </div>
+
     <!-- Staff Cashout Modal -->
     <div id="staffCashoutModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4">
         <div class="bg-white rounded-3xl border border-stone-200 shadow-xl max-w-md w-full p-6 space-y-4 relative animate-in fade-in zoom-in-95 duration-150">
@@ -270,6 +336,17 @@
                     </div>
                 </div>
 
+                <!-- Test Mode Note -->
+                <div class="p-3 rounded-2xl bg-stone-50 border border-stone-200 text-[11px] text-stone-600 space-y-1">
+                    <div class="font-bold text-stone-800 flex items-center space-x-1">
+                        <i data-lucide="info" class="w-3.5 h-3.5 text-emerald-700"></i>
+                        <span>How PayMongo Cashout Works:</span>
+                    </div>
+                    <p class="leading-relaxed">
+                        Payouts use PayMongo's direct disbursement API to credit funds straight to your Maya or GCash account. There is no customer checkout page because this is an outbound transfer to your mobile number.
+                    </p>
+                </div>
+
                 <!-- Submit Button -->
                 <div class="pt-2">
                     <button type="submit"
@@ -281,6 +358,56 @@
             </form>
         </div>
     </div>
+
+    <!-- PayMongo Payout Receipt Modal (Automatically opens on successful cashout) -->
+    @if(session('payout_receipt'))
+        @php $receipt = session('payout_receipt'); @endphp
+        <div id="payoutReceiptModal" class="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl border border-stone-200 shadow-2xl max-w-sm w-full p-6 text-center space-y-4 animate-in fade-in zoom-in-95 duration-200">
+                <!-- Success Icon -->
+                <div class="w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 mx-auto flex items-center justify-center">
+                    <i data-lucide="check" class="w-8 h-8 stroke-[3]"></i>
+                </div>
+
+                <div>
+                    <span class="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800">
+                        PayMongo Disbursements (Test Mode)
+                    </span>
+                    <h3 class="text-xl font-black text-stone-900 mt-2">Cashout Dispatched!</h3>
+                    <p class="text-xs text-stone-500">Transferred directly to your {{ $receipt['payout_method'] }} wallet</p>
+                </div>
+
+                <!-- Receipt Card -->
+                <div class="bg-stone-50 rounded-2xl p-4 border border-stone-200 text-xs space-y-2 text-left">
+                    <div class="flex justify-between">
+                        <span class="text-stone-500 font-medium">Reference:</span>
+                        <span class="font-mono font-bold text-stone-900">{{ $receipt['reference_no'] }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-stone-500 font-medium">Channel:</span>
+                        <span class="font-bold text-stone-900">{{ $receipt['payout_method'] }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-stone-500 font-medium">Recipient:</span>
+                        <span class="font-bold text-stone-900">{{ $receipt['account_name'] }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-stone-500 font-medium">Mobile Number:</span>
+                        <span class="font-mono font-bold text-stone-900">{{ $receipt['account_number'] }}</span>
+                    </div>
+                    <div class="border-t border-stone-200 pt-2 flex justify-between items-baseline">
+                        <span class="text-stone-700 font-bold">Total Transferred:</span>
+                        <span class="text-lg font-black text-emerald-800">₱{{ number_format($receipt['amount'], 2) }}</span>
+                    </div>
+                </div>
+
+                <button type="button" onclick="document.getElementById('payoutReceiptModal').remove()"
+                    class="w-full py-3 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-black text-xs shadow-xs transition active:scale-95">
+                    Close Receipt
+                </button>
+            </div>
+        </div>
+    @endif
 
 </div>
 

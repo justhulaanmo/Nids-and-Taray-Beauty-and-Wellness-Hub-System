@@ -126,6 +126,7 @@ class PayoutController extends Controller
         }
 
         $referenceNo = Payout::generateReferenceNo();
+        $poutSimId = 'pout_sim_' . uniqid();
 
         Payout::create([
             'reference_no' => $referenceNo,
@@ -139,11 +140,40 @@ class PayoutController extends Controller
             'account_name' => $request->account_name,
             'account_number' => $request->account_number,
             'status' => 'completed',
-            'paymongo_payout_id' => 'pout_sim_' . uniqid(),
+            'paymongo_payout_id' => $poutSimId,
             'notes' => 'Staff Commission Cashout via ' . strtoupper($request->payout_method),
             'completed_at' => now(),
         ]);
 
-        return back()->with('success', "Commission payout #{$referenceNo} of ₱" . number_format($requestedAmount, 2) . " processed successfully!");
+        return back()
+            ->with('success', "Commission payout #{$referenceNo} of ₱" . number_format($requestedAmount, 2) . " processed successfully via PayMongo Disbursements!")
+            ->with('payout_receipt', [
+                'reference_no' => $referenceNo,
+                'amount' => $requestedAmount,
+                'payout_method' => strtoupper($request->payout_method),
+                'account_name' => $request->account_name,
+                'account_number' => $request->account_number,
+                'paymongo_payout_id' => $poutSimId,
+                'completed_at' => now()->format('M d, Y • h:i A'),
+            ]);
+    }
+
+    /**
+     * Void a test payout to restore staff balance during testing
+     */
+    public function voidPayout(int|string $id)
+    {
+        $user = Auth::user();
+        $payout = Payout::findOrFail($id);
+
+        if ($user->role !== 'admin' && $payout->user_id !== $user->id) {
+            abort(403, 'Unauthorized to void this payout.');
+        }
+
+        $amount = $payout->gross_amount;
+        $ref = $payout->reference_no;
+        $payout->delete();
+
+        return back()->with('success', "Test payout #{$ref} was voided. ₱" . number_format($amount, 2) . " has been restored to your available balance for testing!");
     }
 }
