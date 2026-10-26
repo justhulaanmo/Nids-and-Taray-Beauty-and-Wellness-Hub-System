@@ -40,32 +40,50 @@ class WalletController extends Controller
             ->latest()
             ->get();
 
+        // Calculate Net Commission per transaction item:
+        // Formula: (Gross Service Price - PayMongo Fees if applicable) * Staff Commission Rate
+        foreach ($items as $item) {
+            $isPayMongo = $item->transaction && in_array($item->transaction->payment_method, ['paymongo_qr', 'paymongo_link']);
+            $paymongoFee = $isPayMongo ? round((float) $item->price * 0.025, 2) : 0.0;
+            $netBase = max(0, (float) $item->price - $paymongoFee);
+            $commRate = (float) ($item->commission_rate ?: $staffProfile->commission_rate);
+            
+            $item->paymongo_fee = $paymongoFee;
+            $item->net_commission = round(($netBase * $commRate) / 100, 2);
+        }
+
         $totalCustomersCount = $items->pluck('transaction_id')->unique()->count();
         $totalServicesCount = $items->count();
 
-        // Calculations
-        $totalSalesHandled = $items->sum('price');
-        $myTotalCommission = $items->where('transaction.payment_status', 'paid')->sum('staff_commission_amount');
+        // My Take-Home Earnings Today (Only paid transactions)
+        $todayTakeHomeEarnings = (float) $items->where('transaction.payment_status', 'paid')->sum('net_commission');
+        $totalSalesHandled = (float) $items->sum('price');
 
-        // Cash vs QR breakdown
-        $cashItems = $items->filter(fn($i) => $i->transaction && $i->transaction->payment_method === 'cash');
-        $qrItems = $items->filter(fn($i) => $i->transaction && $i->transaction->payment_method === 'paymongo_qr');
+        // All-Time Commission Calculation with Net formula
+        $allTimeItems = TransactionItem::where('staff_id', $staffProfile->id)
+            ->whereHas('transaction', function ($q) {
+                $q->where('payment_status', 'paid')->where('status', '!=', 'cancelled');
+            })
+            ->with('transaction')
+            ->get();
 
-        $cashCollected = $cashItems->where('transaction.payment_status', 'paid')->sum('price');
-        $myCashCommission = $cashItems->where('transaction.payment_status', 'paid')->sum('staff_commission_amount');
-        
-        // Shop share from cash collected = Cash Collected minus My Commission on Cash
-        $cashToRemitToShop = $cashCollected - $myCashCommission;
+        $totalEarnedAllTime = (float) $allTimeItems->sum(function ($item) use ($staffProfile) {
+            $isPayMongo = $item->transaction && in_array($item->transaction->payment_method, ['paymongo_qr', 'paymongo_link']);
+            $paymongoFee = $isPayMongo ? round((float) $item->price * 0.025, 2) : 0.0;
+            $netBase = max(0, (float) $item->price - $paymongoFee);
+            $rate = (float) ($item->commission_rate ?: $staffProfile->commission_rate);
+            return round(($netBase * $rate) / 100, 2);
+        });
 
-        // If there are QR payments, the shop received the money directly, so shop owes staff their QR commission
-        $qrCommissionOwedToStaff = $qrItems->where('transaction.payment_status', 'paid')->sum('staff_commission_amount');
+        $totalStaffWithdrawn = (float) \App\Models\Payout::where('staff_id', $staffProfile->id)
+            ->where('status', 'completed')
+            ->sum('gross_amount');
 
-        // All-Time Commission Balance & Cashouts
-        $totalEarnedAllTime = (float) TransactionItem::where('staff_id', $staffProfile->id)
-            ->whereHas('transaction', fn($q) => $q->where('payment_status', 'paid')->where('status', '!=', 'cancelled'))
-            ->sum('staff_commission_amount');
-        $totalStaffWithdrawn = (float) \App\Models\Payout::where('staff_id', $staffProfile->id)->where('status', 'completed')->sum('gross_amount');
-        $availableCommissionBalance = max(0, $totalEarnedAllTime - $totalStaffWithdrawn);
+        $pendingPayouts = (float) \App\Models\Payout::where('staff_id', $staffProfile->id)
+            ->where('status', 'pending')
+            ->sum('gross_amount');
+
+        $availableCommissionBalance = max(0, round($totalEarnedAllTime - $totalStaffWithdrawn - $pendingPayouts, 2));
         $staffPayouts = \App\Models\Payout::where('staff_id', $staffProfile->id)->latest()->take(5)->get();
 
         return view('wallet.index', compact(
@@ -75,10 +93,7 @@ class WalletController extends Controller
             'totalCustomersCount',
             'totalServicesCount',
             'totalSalesHandled',
-            'myTotalCommission',
-            'cashCollected',
-            'cashToRemitToShop',
-            'qrCommissionOwedToStaff',
+            'todayTakeHomeEarnings',
             'totalEarnedAllTime',
             'totalStaffWithdrawn',
             'availableCommissionBalance',

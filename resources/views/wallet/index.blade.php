@@ -3,7 +3,7 @@
 @section('content')
 <div class="max-w-3xl mx-auto space-y-5">
 
-    <!-- Top Profile & Date Filter (Crisp White Card for 100% Clarity) -->
+    <!-- Top Profile & Date Filter -->
     <div class="bg-white rounded-3xl border border-stone-200/90 p-4 sm:p-5 shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
             <h1 class="text-xl sm:text-2xl font-black text-stone-900 tracking-tight flex items-center space-x-2">
@@ -11,83 +11,129 @@
                 <span>My Wallet & Earnings</span>
             </h1>
             <p class="text-xs text-stone-600 mt-1 font-semibold">
-                Attendant: <strong class="text-emerald-900 font-extrabold">{{ $staffProfile->nickname ?? $staffProfile->name }}</strong> ({{ $staffProfile->commission_rate }}% Commission Rate)
+                Attendant: <strong class="text-emerald-900 font-extrabold">{{ $staffProfile->nickname ?? $staffProfile->name }}</strong> 
+                <span class="inline-flex items-center px-2 py-0.5 ml-1.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800">
+                    {{ $staffProfile->commission_rate }}% Commission
+                </span>
             </p>
         </div>
 
-        <div class="flex flex-wrap items-center gap-2 self-start sm:self-auto">
-            <button type="button" onclick="openStaffCashoutModal()"
-                class="px-4 py-2 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-stone-950 font-black text-xs shadow-xs transition-all active:scale-95 flex items-center space-x-1.5">
-                <i data-lucide="arrow-up-right" class="w-4 h-4 text-stone-950"></i>
-                <span>Cashout (₱{{ number_format($availableCommissionBalance, 0) }})</span>
+        <form method="GET" action="{{ route('wallet.index') }}" class="flex items-center space-x-2 bg-stone-50 p-1.5 rounded-2xl border border-stone-200 shadow-2xs self-start sm:self-auto">
+            <span class="text-xs font-bold text-stone-600 pl-2">Date:</span>
+            <input type="date" name="date" value="{{ $selectedDate }}" onchange="this.form.submit()"
+                class="px-2.5 py-1 text-xs font-bold bg-white text-stone-900 rounded-xl border border-stone-300 focus:outline-hidden focus:ring-1 focus:ring-emerald-500">
+            <button type="submit" class="px-3.5 py-1 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-xs transition">
+                Filter
             </button>
-
-            <form method="GET" action="{{ route('wallet.index') }}" class="flex items-center space-x-2 bg-stone-50 p-1.5 rounded-2xl border border-stone-200 shadow-2xs">
-                <span class="text-xs font-bold text-stone-600 pl-2">Date:</span>
-                <input type="date" name="date" value="{{ $selectedDate }}" onchange="this.form.submit()"
-                    class="px-2.5 py-1 text-xs font-bold bg-white text-stone-900 rounded-xl border border-stone-300 focus:outline-hidden focus:ring-1 focus:ring-emerald-500">
-                <button type="submit" class="px-3.5 py-1 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-xs transition">
-                    Filter
-                </button>
-            </form>
-        </div>
+        </form>
     </div>
 
-    <!-- Main Wallet Cards (Solid High-Contrast Wellness Theme) -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <!-- Customers Count -->
-        <div class="bg-white rounded-3xl p-4 border border-stone-200 shadow-xs space-y-1">
-            <span class="text-[10px] font-bold uppercase tracking-wider text-stone-500 block">Clients Served</span>
-            <span class="text-3xl font-black text-stone-900 block">{{ $totalCustomersCount }}</span>
-            <span class="text-[11px] text-stone-600 font-medium block">{{ $totalServicesCount }} treatments</span>
-        </div>
+    <!-- Massive Hero Card: My Take-Home Earnings Today -->
+    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-800 via-emerald-900 to-teal-950 text-white p-6 sm:p-8 shadow-md border border-emerald-700/40">
+        <!-- Background subtle decorative pattern -->
+        <div class="absolute -right-8 -bottom-8 w-44 h-44 rounded-full bg-emerald-600/20 blur-2xl pointer-events-none"></div>
+        <div class="absolute -left-6 -top-6 w-36 h-36 rounded-full bg-teal-400/10 blur-xl pointer-events-none"></div>
 
-        <!-- My Commission -->
-        <div class="bg-emerald-50 rounded-3xl p-4 border-2 border-emerald-300 shadow-xs space-y-1">
-            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-900 block">My Commission</span>
-            <span class="text-2xl sm:text-3xl font-black text-emerald-800 block">₱{{ number_format($myTotalCommission, 2) }}</span>
-            <span class="text-[10px] text-emerald-700 font-bold block">Personal Earnings</span>
-        </div>
+        <div class="relative z-10 space-y-3">
+            <div class="flex items-center justify-between">
+                <span class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-[11px] font-black tracking-wide uppercase bg-emerald-700/60 text-emerald-200 border border-emerald-500/30">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-300"></i>
+                    <span>Today's Net Take-Home Pay</span>
+                </span>
+                <span class="text-xs text-emerald-200/80 font-medium">
+                    {{ \Carbon\Carbon::parse($selectedDate)->format('M d, Y') }}
+                </span>
+            </div>
 
-        <!-- Cash in Hand -->
-        <div class="bg-white rounded-3xl p-4 border border-stone-200 shadow-xs space-y-1">
-            <span class="text-[10px] font-bold uppercase tracking-wider text-stone-500 block">Cash Collected</span>
-            <span class="text-2xl sm:text-3xl font-black text-stone-900 block">₱{{ number_format($cashCollected, 2) }}</span>
-            <span class="text-[10px] text-stone-600 font-medium block">From cash clients</span>
-        </div>
+            <div>
+                <span class="text-xs sm:text-sm font-bold text-emerald-200/90 block">My Take-Home Earnings Today</span>
+                <div class="flex items-baseline space-x-2 mt-1">
+                    <span class="text-4xl sm:text-5xl font-black tracking-tight text-white">
+                        ₱{{ number_format($todayTakeHomeEarnings, 2) }}
+                    </span>
+                    <span class="text-xs font-bold text-emerald-300/80">PHP</span>
+                </div>
+            </div>
 
-        <!-- Remit to Shop -->
-        <div class="bg-teal-50 rounded-3xl p-4 border-2 border-teal-300 shadow-xs space-y-1">
-            <span class="text-[10px] font-bold uppercase tracking-wider text-teal-900 block">Cash Due to Shop</span>
-            <span class="text-2xl sm:text-3xl font-black text-teal-800 block">₱{{ number_format($cashToRemitToShop, 2) }}</span>
-            <span class="text-[10px] text-teal-700 font-bold block">End-of-Shift Remit</span>
-        </div>
-    </div>
-
-    <!-- Quick Formula / Explainer Banner (Solid White Card for Crisp Legibility) -->
-    <div class="bg-white rounded-3xl p-4 sm:p-5 border-2 border-emerald-200 text-xs text-stone-700 flex items-start space-x-3 shadow-xs">
-        <i data-lucide="help-circle" class="w-5 h-5 text-emerald-700 flex-shrink-0 mt-0.5"></i>
-        <div>
-            <strong class="text-stone-900 font-extrabold text-sm block">How is the cash remittance calculated?</strong>
-            <p class="mt-1 text-stone-600 leading-relaxed">
-                From total cash collected (<strong>₱{{ number_format($cashCollected, 2) }}</strong>), subtract your commission (<strong>{{ $staffProfile->commission_rate }}%</strong>). The remaining balance to turn in to the shop is <strong class="text-emerald-900 font-black">₱{{ number_format($cashToRemitToShop, 2) }}</strong>.
+            <p class="text-xs text-emerald-200/70 font-medium pt-1 border-t border-emerald-700/50 flex items-center justify-between">
+                <span>Personal take-home commission after platform fees</span>
+                <span class="font-bold text-emerald-100">{{ $totalServicesCount }} completed {{ \Illuminate\Support\Str::plural('job', $totalServicesCount) }}</span>
             </p>
-            @if($qrCommissionOwedToStaff > 0)
-                <p class="mt-1.5 text-emerald-800 font-bold">
-                    You also have PayMongo QR earnings (₱{{ number_format($qrCommissionOwedToStaff, 2) }} commission) deposited directly to the shop account.
-                </p>
-            @endif
         </div>
     </div>
 
-    <!-- Customer Breakdown Log -->
-    <div class="bg-white rounded-3xl border border-emerald-900/10 shadow-xs overflow-hidden">
+    <!-- Secondary Metrics Row: Clients Served & Available Cashout Balance -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+        <!-- Clients Served Card -->
+        <div class="bg-white rounded-3xl p-5 border border-stone-200 shadow-xs flex items-center justify-between">
+            <div class="space-y-1">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-stone-500 block">Clients Served Today</span>
+                <span class="text-3xl font-black text-stone-900 block">{{ $totalCustomersCount }}</span>
+                <span class="text-xs text-stone-600 font-semibold block">{{ $totalServicesCount }} treatments handled</span>
+            </div>
+            <div class="w-12 h-12 rounded-2xl bg-stone-100 text-stone-700 flex items-center justify-center shrink-0">
+                <i data-lucide="users" class="w-6 h-6"></i>
+            </div>
+        </div>
+
+        <!-- Available for Cashout Tile with Cashout Button Directly Below It -->
+        <div class="bg-white rounded-3xl p-5 border-2 border-emerald-200 shadow-xs flex flex-col justify-between space-y-3">
+            <div class="flex items-center justify-between">
+                <div class="space-y-0.5">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-800 block">Available for Cashout</span>
+                    <span class="text-2xl sm:text-3xl font-black text-emerald-900 block">
+                        ₱{{ number_format($availableCommissionBalance, 2) }}
+                    </span>
+                    <span class="text-[11px] text-stone-500 font-medium block">All-time unwithdrawn commission</span>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 border border-emerald-200">
+                    <i data-lucide="coins" class="w-6 h-6"></i>
+                </div>
+            </div>
+
+            <!-- Cashout Button Positioned Logically Under the Balance Tile -->
+            <div>
+                @if($availableCommissionBalance >= 50)
+                    <button type="button" onclick="openStaffCashoutModal()"
+                        class="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-stone-950 font-black text-xs shadow-xs transition-all active:scale-[0.98] flex items-center justify-center space-x-1.5">
+                        <i data-lucide="arrow-up-right" class="w-4 h-4 text-stone-950"></i>
+                        <span>Cashout Commission</span>
+                    </button>
+                @else
+                    <button type="button" disabled
+                        class="w-full py-2.5 px-4 rounded-2xl bg-stone-100 text-stone-400 font-bold text-xs cursor-not-allowed flex items-center justify-center space-x-1.5">
+                        <i data-lucide="lock" class="w-3.5 h-3.5"></i>
+                        <span>Cashout (Min. ₱50.00)</span>
+                    </button>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    <!-- Career / All-Time Summary Bar -->
+    <div class="bg-stone-50 rounded-2xl p-3.5 border border-stone-200 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div class="flex items-center space-x-2">
+            <i data-lucide="history" class="w-4 h-4 text-stone-500"></i>
+            <span class="font-bold text-stone-700">Career Total Earned:</span>
+            <span class="font-black text-emerald-800">₱{{ number_format($totalEarnedAllTime, 2) }}</span>
+        </div>
+        <div class="flex items-center space-x-2">
+            <span class="text-stone-500 font-medium">Total Cashed Out:</span>
+            <span class="font-bold text-stone-800">₱{{ number_format($totalStaffWithdrawn, 2) }}</span>
+        </div>
+    </div>
+
+    <!-- Today's Service Log (Strict Employee Net Cut View) -->
+    <div class="bg-white rounded-3xl border border-stone-200 shadow-xs overflow-hidden">
         <div class="p-4 sm:p-5 border-b border-stone-100 flex items-center justify-between">
-            <h2 class="text-sm font-black text-stone-900 uppercase tracking-wider flex items-center space-x-1.5">
-                <i data-lucide="calendar-check" class="w-4 h-4 text-emerald-800"></i>
-                <span>Today's Service Log</span>
-            </h2>
-            <a href="{{ route('transactions.create') }}" class="px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs transition inline-flex items-center space-x-1">
+            <div>
+                <h2 class="text-sm font-black text-stone-900 uppercase tracking-wider flex items-center space-x-1.5">
+                    <i data-lucide="calendar-check" class="w-4 h-4 text-emerald-800"></i>
+                    <span>Today's Service Log</span>
+                </h2>
+                <p class="text-[11px] text-stone-500 font-medium mt-0.5">List of jobs handled and your final net take-home commission</p>
+            </div>
+            <a href="{{ route('transactions.create') }}" class="px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-xs transition inline-flex items-center space-x-1">
                 <i data-lucide="plus" class="w-3.5 h-3.5"></i>
                 <span>New Order</span>
             </a>
@@ -97,7 +143,7 @@
             <div class="p-8 text-center text-xs text-stone-400 space-y-2">
                 <i data-lucide="inbox" class="w-8 h-8 text-stone-300 mx-auto"></i>
                 <div class="font-bold text-stone-800 text-sm">No recorded services for this date yet.</div>
-                <div>Recorded services and commissions will automatically appear here once added.</div>
+                <div>When you service a client, your job and net commission cut will appear here.</div>
             </div>
         @else
             <div class="divide-y divide-stone-100">
@@ -119,22 +165,30 @@
                                 @endif
                             </div>
                             <p class="text-stone-500">
-                                {{ $item->service->name ?? 'Service' }} &bull; 
+                                <strong class="text-stone-700">{{ $item->service->name ?? 'Service' }}</strong> &bull; 
                                 <span class="text-stone-400">{{ $item->created_at->format('h:i A') }}</span>
+                                <span class="text-stone-400 ml-1">(Price: ₱{{ number_format($item->price, 2) }})</span>
                             </p>
                         </div>
 
                         <div class="text-right">
-                            <span class="font-black text-emerald-800 text-sm block">
-                                +₱{{ number_format($item->staff_commission_amount, 2) }}
-                            </span>
-                            <span class="text-[10px] text-stone-500 inline-flex items-center space-x-1 justify-end">
+                            <div class="flex items-center justify-end space-x-1">
+                                <span class="text-[10px] font-bold text-emerald-700 uppercase">Net Take-Home:</span>
+                                <span class="font-black text-emerald-800 text-base">
+                                    +₱{{ number_format($item->net_commission, 2) }}
+                                </span>
+                            </div>
+                            <span class="text-[10px] text-stone-500 inline-flex items-center space-x-1 justify-end mt-0.5">
                                 @if($item->transaction->payment_method === 'paymongo_qr')
-                                    <i data-lucide="qr-code" class="w-3 h-3 text-indigo-700"></i>
-                                    <span>PayMongo QR</span>
+                                    <span class="inline-flex items-center space-x-1 px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200 font-semibold">
+                                        <i data-lucide="qr-code" class="w-3 h-3 text-indigo-700"></i>
+                                        <span>PayMongo QR (-2.5% fee)</span>
+                                    </span>
                                 @else
-                                    <i data-lucide="banknote" class="w-3 h-3 text-emerald-700"></i>
-                                    <span>Cash (₱{{ number_format($item->price, 0) }})</span>
+                                    <span class="inline-flex items-center space-x-1 px-2 py-0.5 rounded-md bg-stone-100 text-stone-600 font-semibold">
+                                        <i data-lucide="banknote" class="w-3 h-3 text-emerald-700"></i>
+                                        <span>Cash Payment</span>
+                                    </span>
                                 @endif
                             </span>
                         </div>

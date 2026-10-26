@@ -94,16 +94,29 @@ class PayoutController extends Controller
             'account_number' => 'required|string|max:50',
         ]);
 
-        // Total earned paid commissions
-        $earnedCommissions = (float) TransactionItem::where('staff_id', $staffProfile->id)
+        // Total earned paid commissions using Net formula: (Gross - PayMongo Fee if QR) * Commission Rate
+        $allStaffItems = TransactionItem::where('staff_id', $staffProfile->id)
             ->whereHas('transaction', fn($q) => $q->where('payment_status', 'paid')->where('status', '!=', 'cancelled'))
-            ->sum('staff_commission_amount');
+            ->with('transaction')
+            ->get();
+
+        $earnedCommissions = (float) $allStaffItems->sum(function ($item) use ($staffProfile) {
+            $isPayMongo = $item->transaction && in_array($item->transaction->payment_method, ['paymongo_qr', 'paymongo_link']);
+            $paymongoFee = $isPayMongo ? round((float) $item->price * 0.025, 2) : 0.0;
+            $netBase = max(0, (float) $item->price - $paymongoFee);
+            $commRate = (float) ($item->commission_rate ?: $staffProfile->commission_rate);
+            return round(($netBase * $commRate) / 100, 2);
+        });
 
         $alreadyWithdrawn = (float) Payout::where('staff_id', $staffProfile->id)
             ->where('status', 'completed')
             ->sum('gross_amount');
 
-        $availableBalance = max(0, $earnedCommissions - $alreadyWithdrawn);
+        $pendingPayouts = (float) Payout::where('staff_id', $staffProfile->id)
+            ->where('status', 'pending')
+            ->sum('gross_amount');
+
+        $availableBalance = max(0, round($earnedCommissions - $alreadyWithdrawn - $pendingPayouts, 2));
         $requestedAmount = (float) $request->amount;
 
         if ($requestedAmount > $availableBalance) {
