@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>{{ $title ?? 'Nids and Taray Beauty & Wellness Hub' }}</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="{{ asset('images/logo.jpg') }}">
+    <link rel="shortcut icon" href="{{ asset('images/logo.jpg') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo.jpg') }}">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -49,7 +53,41 @@
         ::-webkit-scrollbar-thumb:hover { background: #94a894; }
     </style>
 </head>
-<body class="min-h-full flex flex-col md:flex-row bg-[#f6f9f6] text-stone-800 antialiased selection:bg-emerald-100 selection:text-emerald-900">
+<body class="min-h-full flex flex-col md:flex-row bg-[#f6f9f6] text-stone-800 antialiased selection:bg-emerald-100 selection:text-emerald-900 relative">
+
+    <!-- App Splash Screen / Logo Flashing Intro -->
+    <div id="app-splash-screen" class="fixed inset-0 z-[9999] bg-emerald-950 flex flex-col items-center justify-center transition-opacity duration-500 ease-out pointer-events-none opacity-100">
+        <div class="flex flex-col items-center animate-pulse">
+            <img src="{{ asset('images/logo.jpg') }}" alt="Nids & Taray" class="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl object-cover shadow-2xl ring-4 ring-emerald-400/40 mb-3 border-2 border-white/20">
+            <h1 class="text-white font-black text-xl sm:text-2xl tracking-tight">Nids & Taray</h1>
+            <span class="text-emerald-300 text-[11px] font-extrabold tracking-widest uppercase mt-0.5">Beauty & Wellness Hub</span>
+        </div>
+    </div>
+    <script>
+        // Smooth dismissal of logo flash splash screen
+        window.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                const splash = document.getElementById('app-splash-screen');
+                if (splash) {
+                    splash.classList.add('opacity-0');
+                    setTimeout(() => splash.remove(), 500);
+                }
+            }, 450);
+        });
+    </script>
+
+    @php
+        $isAdminUser = Auth::check() && Auth::user()->role === 'admin';
+        $bgImage = $isAdminUser
+            ? (file_exists(public_path('images/admin-bg.jpg')) ? asset('images/admin-bg.jpg') : asset('images/nids-and-taray-bg.jpg'))
+            : (file_exists(public_path('images/employee-bg.jpg')) ? asset('images/employee-bg.jpg') : asset('images/nids-and-taray-bg.jpg'));
+    @endphp
+
+    <!-- Subtle Luxury Spa Background Wallpaper Layer (Adaptive to Admin vs Employee) -->
+    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-30 select-none">
+        <img src="{{ $bgImage }}" alt="" class="w-full h-full object-cover filter blur-[2px] scale-105">
+        <div class="absolute inset-0 bg-[#f6f9f6]/80 mix-blend-screen"></div>
+    </div>
 
     <!-- Mobile Top Bar (Visible only on small screens) -->
     <header class="md:hidden sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-stone-200/80 px-4 py-3 flex items-center justify-between shadow-2xs">
@@ -58,9 +96,7 @@
                 <i data-lucide="menu" class="w-5 h-5"></i>
             </button>
             <a href="{{ route('dashboard') }}" class="flex items-center space-x-2">
-                <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-emerald-700 to-teal-600 flex items-center justify-center text-white font-black text-xs shadow-xs">
-                    NT
-                </div>
+                <img src="{{ asset('images/logo.jpg') }}" alt="Nids & Taray" class="w-8 h-8 rounded-lg object-cover shadow-xs border border-emerald-200 flex-shrink-0">
                 <div>
                     <span class="text-sm font-black text-stone-900 tracking-tight leading-tight block">Nids & Taray</span>
                     <span class="text-[9px] font-bold text-emerald-800 uppercase tracking-wider block">Beauty & Wellness</span>
@@ -85,12 +121,10 @@
         <!-- Top Section: Brand + Sticky Action Button + Navigation -->
         <div class="flex flex-col flex-1 min-h-0 overflow-y-auto">
             
-            <!-- Sidebar Header / Brand -->
+            <!-- Sidebar Header / Brand with Upper Corner Logo -->
             <div class="p-4 lg:p-5 border-b border-stone-100 flex items-center justify-between">
                 <a href="{{ route('dashboard') }}" class="flex items-center space-x-2.5">
-                    <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-700 to-teal-600 flex items-center justify-center text-white shadow-xs font-black text-sm tracking-wider">
-                        NT
-                    </div>
+                    <img src="{{ asset('images/logo.jpg') }}" alt="Nids & Taray" class="w-10 h-10 rounded-2xl object-cover shadow-xs border border-emerald-200 flex-shrink-0">
                     <div>
                         <span class="text-base font-extrabold tracking-tight text-stone-900 block leading-tight">
                             Nids & Taray
@@ -204,7 +238,7 @@
     </aside>
 
     <!-- Main Content Area -->
-    <div class="flex-1 flex flex-col min-w-0">
+    <div class="flex-1 flex flex-col min-w-0 relative z-10">
         <main class="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto pb-24 md:pb-10">
             
             <!-- Flash Alerts -->

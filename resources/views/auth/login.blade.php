@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Login &bull; Nids and Taray Beauty & Wellness Hub</title>
+    <link rel="icon" type="image/jpeg" href="{{ asset('images/logo.jpg') }}">
+    <link rel="shortcut icon" href="{{ asset('images/logo.jpg') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo.jpg') }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,9 +33,7 @@
         
         <!-- Header Banner -->
         <div class="px-6 pt-8 pb-6 text-center border-b border-emerald-900/10 bg-gradient-to-b from-emerald-50/90 to-white">
-            <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-700 to-teal-600 text-white shadow-md shadow-emerald-700/20 mb-3 font-black text-xl tracking-wider">
-                NT
-            </div>
+            <img src="{{ asset('images/logo.jpg') }}" alt="Nids and Taray" class="w-16 h-16 rounded-2xl object-cover shadow-md mx-auto mb-3 border border-emerald-100 ring-2 ring-emerald-500/20">
             <h1 class="text-xl font-black tracking-tight text-stone-900">Nids and Taray</h1>
             <p class="text-emerald-800 text-[11px] font-extrabold uppercase tracking-widest mt-0.5">Beauty & Wellness Hub</p>
             <p class="text-stone-500 text-xs mt-1 font-medium">Staff & Admin Mobile Portal</p>
