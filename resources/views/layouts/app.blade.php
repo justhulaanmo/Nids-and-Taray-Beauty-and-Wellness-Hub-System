@@ -1,3 +1,9 @@
+@php
+    $isAdminUser = Auth::check() && Auth::user()->role === 'admin';
+    $bgImage = $isAdminUser
+        ? (file_exists(public_path('images/admin-bg.jpg')) ? asset('images/admin-bg.jpg') : asset('images/nids-and-taray-bg.jpg'))
+        : (file_exists(public_path('images/employee-bg.jpg')) ? asset('images/employee-bg.jpg') : asset('images/nids-and-taray-bg.jpg'));
+@endphp
 <!DOCTYPE html>
 <html lang="en" class="h-full bg-[#f6f9f6]">
 <head>
@@ -8,6 +14,8 @@
     <link rel="icon" type="image/jpeg" href="{{ asset('images/logo.jpg') }}">
     <link rel="shortcut icon" href="{{ asset('images/logo.jpg') }}">
     <link rel="apple-touch-icon" href="{{ asset('images/logo.jpg') }}">
+    <!-- Preload Background Image for Instant Zero-Lag Rendering -->
+    <link rel="preload" as="image" href="{{ $bgImage }}" fetchpriority="high">
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -76,16 +84,9 @@
         });
     </script>
 
-    @php
-        $isAdminUser = Auth::check() && Auth::user()->role === 'admin';
-        $bgImage = $isAdminUser
-            ? (file_exists(public_path('images/admin-bg.jpg')) ? asset('images/admin-bg.jpg') : asset('images/nids-and-taray-bg.jpg'))
-            : (file_exists(public_path('images/employee-bg.jpg')) ? asset('images/employee-bg.jpg') : asset('images/nids-and-taray-bg.jpg'));
-    @endphp
-
     <!-- Subtle Luxury Spa Background Wallpaper Layer (Adaptive to Admin vs Employee) -->
     <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none bg-[#f6f9f6]">
-        <img src="{{ $bgImage }}" alt="" class="w-full h-full object-cover opacity-20 filter blur-[1px] scale-105">
+        <img src="{{ $bgImage }}" alt="" class="w-full h-full object-cover opacity-20 filter blur-[1px] scale-105" decoding="async">
         <div class="absolute inset-0 bg-white/75"></div>
     </div>
 
