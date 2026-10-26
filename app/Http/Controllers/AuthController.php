@@ -46,21 +46,50 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'first_name' => 'required|string|max:100',
+            'last_name' => 'required|string|max:100',
             'nickname' => 'required|string|max:50',
-            'email' => 'required|email|max:255|unique:users,email',
-            'phone' => 'nullable|string|max:20',
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                'unique:users,email',
+                'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/',
+            ],
+            'phone' => [
+                'required',
+                'string',
+                'regex:/^09[0-9]{9}$/',
+            ],
             'specialization' => 'required|in:all_around,manicurist,massage_therapist',
-            'password' => 'required|string|min:6|confirmed',
+            'password' => [
+                'required',
+                'string',
+                'confirmed',
+                \Illuminate\Validation\Rules\Password::min(8)
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols(),
+            ],
+        ], [
+            'first_name.required' => 'First name is required.',
+            'last_name.required' => 'Last name is required.',
+            'email.regex' => 'Please enter a valid email format (e.g. name@gmail.com).',
+            'phone.regex' => 'Mobile number must start with 09 and contain exactly 11 digits (e.g. 09171234567).',
+            'password.min' => 'Password must be at least 8 characters long.',
         ]);
+
+        $fullName = trim(ucwords(strtolower($validated['first_name'])) . ' ' . ucwords(strtolower($validated['last_name'])));
+        $nickname = trim(ucwords(strtolower($validated['nickname'])));
 
         // Create User account
         $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
+            'name' => $fullName,
+            'email' => strtolower($validated['email']),
             'password' => Hash::make($validated['password']),
             'role' => 'staff',
-            'phone' => $validated['phone'] ?? null,
+            'phone' => $validated['phone'],
             'is_active' => true,
         ]);
 
@@ -70,9 +99,9 @@ class AuthController extends Controller
         // Create Staff Profile in rotation queue
         StaffProfile::create([
             'user_id' => $user->id,
-            'name' => $validated['name'],
-            'nickname' => $validated['nickname'],
-            'phone' => $validated['phone'] ?? null,
+            'name' => $fullName,
+            'nickname' => $nickname,
+            'phone' => $validated['phone'],
             'specialization' => $validated['specialization'],
             'status' => 'available',
             'queue_position' => $nextQueue,
@@ -84,7 +113,7 @@ class AuthController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->route('dashboard')->with('success', 'Welcome to Nids & Taray, ' . ($validated['nickname'] ?? $validated['name']) . '! You are now registered and in the queue.');
+        return redirect()->route('dashboard')->with('success', 'Welcome to Nids & Taray, ' . $nickname . '! You are now registered and in the queue.');
     }
 
     public function logout(Request $request)
