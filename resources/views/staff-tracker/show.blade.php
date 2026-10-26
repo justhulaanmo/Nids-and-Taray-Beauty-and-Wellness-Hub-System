@@ -15,18 +15,35 @@
         </span>
     </div>
 
+    @php
+        $specKey = strtolower($staff->specialization ?? '');
+        if (str_contains($specKey, 'mani')) {
+            $avatarGradient = 'bg-gradient-to-tr from-rose-500 to-pink-500';
+            $roleBadgeClass = 'bg-rose-50 text-rose-800 border-rose-200';
+            $cardBorder = 'border-rose-200/90 border-l-4 border-l-rose-400';
+        } elseif (str_contains($specKey, 'mass')) {
+            $avatarGradient = 'bg-gradient-to-tr from-sky-500 to-teal-600';
+            $roleBadgeClass = 'bg-sky-50 text-sky-800 border-sky-200';
+            $cardBorder = 'border-sky-200/90 border-l-4 border-l-sky-400';
+        } else {
+            $avatarGradient = 'bg-gradient-to-tr from-emerald-600 to-teal-600';
+            $roleBadgeClass = 'bg-emerald-50 text-emerald-800 border-emerald-200';
+            $cardBorder = 'border-emerald-200/90 border-l-4 border-l-emerald-500';
+        }
+    @endphp
+
     <!-- Staff Profile Card -->
-    <div class="bg-white rounded-2xl border border-emerald-900/10 p-6 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div class="bg-white rounded-3xl border {{ $cardBorder }} p-6 shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div class="flex items-center space-x-4">
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center font-black text-2xl shadow-xs">
+            <div class="w-16 h-16 rounded-2xl {{ $avatarGradient }} text-white flex items-center justify-center font-black text-2xl shadow-2xs shrink-0">
                 {{ substr($staff->nickname ?? $staff->name, 0, 1) }}
             </div>
             <div>
                 <h1 class="text-xl font-extrabold text-stone-900">{{ $staff->nickname ?? $staff->name }}</h1>
                 <p class="text-xs text-stone-500">{{ $staff->name }} &bull; {{ $staff->phone ?? 'No contact number' }}</p>
-                <div class="flex items-center space-x-2 mt-1">
-                    <span class="inline-flex items-center space-x-1 text-xs font-bold text-emerald-800 capitalize">
-                        <i data-lucide="briefcase" class="w-3 h-3 text-emerald-700"></i>
+                <div class="flex flex-wrap items-center gap-2 mt-1.5">
+                    <span class="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-md text-[11px] font-extrabold uppercase tracking-wider border {{ $roleBadgeClass }}">
+                        <i data-lucide="briefcase" class="w-3 h-3"></i>
                         <span>{{ str_replace('_', ' ', $staff->specialization) }}</span>
                     </span>
                     <span class="text-stone-300">&bull;</span>
@@ -37,9 +54,9 @@
             </div>
         </div>
 
-        <div class="flex items-center space-x-3 text-right">
-            <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
-                <span class="block text-xs font-bold text-emerald-800 uppercase">Total Commission</span>
+        <div class="flex items-center space-x-3 sm:text-right">
+            <div class="p-3.5 bg-emerald-50/80 border border-emerald-200/90 rounded-2xl shadow-2xs">
+                <span class="block text-[10px] font-black text-emerald-800 uppercase tracking-wider">Total Commission</span>
                 <span class="block text-2xl font-black text-emerald-700">
                     ₱{{ number_format($items->where('transaction.payment_status', 'paid')->sum('staff_commission_amount'), 2) }}
                 </span>
