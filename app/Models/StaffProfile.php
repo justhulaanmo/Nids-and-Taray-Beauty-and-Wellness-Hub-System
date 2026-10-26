@@ -95,4 +95,66 @@ class StaffProfile extends Model
             default => ['label' => $this->status, 'class' => 'bg-stone-100 text-stone-600 border-stone-200'],
         };
     }
+
+    /**
+     * Check if this staff member can perform a specific service based on specialization.
+     */
+    public function canPerformService($service): bool
+    {
+        if ($this->specialization === 'all_around') {
+            return true;
+        }
+
+        $category = $service->category ?? null;
+        $catSlug = strtolower($category->slug ?? '');
+        $catName = strtolower($category->name ?? '');
+        $srvName = strtolower($service->name ?? '');
+
+        $isNailService = str_contains($catSlug, 'nail') || 
+                         str_contains($catName, 'nail') || 
+                         str_contains($catName, 'cutic') || 
+                         str_contains($srvName, 'manicure') || 
+                         str_contains($srvName, 'pedicure') || 
+                         str_contains($srvName, 'nail');
+
+        $isMassageService = str_contains($catSlug, 'mass') || 
+                            str_contains($catName, 'mass') || 
+                            str_contains($catName, 'wellness') || 
+                            str_contains($srvName, 'massage') || 
+                            str_contains($srvName, 'reflexology') || 
+                            str_contains($srvName, 'ventosa');
+
+        if ($this->specialization === 'manicurist') {
+            return $isNailService && !$isMassageService;
+        }
+
+        if ($this->specialization === 'massage_therapist') {
+            return $isMassageService && !$isNailService;
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if this staff member is qualified for a service category.
+     */
+    public function isQualifiedForCategory($category): bool
+    {
+        if ($this->specialization === 'all_around') {
+            return true;
+        }
+
+        $slug = strtolower($category->slug ?? '');
+        $name = strtolower($category->name ?? '');
+
+        if ($this->specialization === 'manicurist') {
+            return str_contains($slug, 'nail') || str_contains($name, 'nail') || str_contains($name, 'cutic');
+        }
+
+        if ($this->specialization === 'massage_therapist') {
+            return str_contains($slug, 'mass') || str_contains($name, 'mass') || str_contains($name, 'wellness');
+        }
+
+        return false;
+    }
 }

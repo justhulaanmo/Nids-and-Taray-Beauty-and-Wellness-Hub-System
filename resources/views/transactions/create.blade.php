@@ -97,7 +97,7 @@
             <div class="flex items-center justify-between border-b border-stone-100 pb-2">
                 <h2 class="text-xs sm:text-sm font-black text-emerald-900 uppercase tracking-wider flex items-center space-x-2">
                     <span class="w-5 h-5 rounded-lg bg-emerald-700 text-white flex items-center justify-center text-[11px] font-black">2</span>
-                    <span>Select Services & Assign Staff</span>
+                    <span>Select Services & Assign Attendant</span>
                 </h2>
                 <a href="{{ route('menu.index') }}" class="text-[11px] font-bold text-emerald-700 hover:underline inline-flex items-center space-x-1">
                     <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
@@ -105,15 +105,54 @@
                 </a>
             </div>
 
-            <div class="space-y-4">
-                @foreach($categories as $cat)
-                    <div class="space-y-2">
-                        <span class="text-xs font-black uppercase tracking-wider block text-emerald-800">
-                            {{ $cat->name }}
+            @if(isset($myStaffProfile) && $isStaff)
+                <div class="p-3 rounded-2xl bg-emerald-50/80 border border-emerald-200 text-xs text-emerald-950 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-6 h-6 rounded-lg bg-emerald-700 text-white flex items-center justify-center font-bold text-xs">
+                            <i data-lucide="user-check" class="w-3.5 h-3.5"></i>
                         </span>
+                        <span>
+                            Service Catalog for: <strong>{{ $myStaffProfile->nickname ?? $myStaffProfile->name }}</strong> 
+                            <span class="capitalize text-emerald-700 font-bold">({{ str_replace('_', ' ', $myStaffProfile->specialization) }})</span>
+                        </span>
+                    </div>
+                    <span class="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 bg-white border border-emerald-300 text-emerald-800 rounded-xl self-start sm:self-auto shadow-2xs">
+                        {{ $myStaffProfile->specialization === 'all_around' ? 'All Services Available' : 'Filtered by Specialization' }}
+                    </span>
+                </div>
+            @endif
+
+            <div class="space-y-4">
+                @forelse($categories as $cat)
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-black uppercase tracking-wider block text-emerald-800">
+                                {{ $cat->name }}
+                            </span>
+                            <span class="text-[10px] text-stone-400 font-bold">
+                                {{ $cat->services->count() }} services
+                            </span>
+                        </div>
 
                         <div class="space-y-2">
                             @foreach($cat->services as $srv)
+                                @php
+                                    // Filter attendants who are eligible for this specific service
+                                    $eligibleAvailable = $availableStaff->filter(fn($s) => $s->canPerformService($srv))->values();
+                                    $eligibleBusy = $busyStaff->filter(fn($s) => $s->canPerformService($srv))->values();
+                                    
+                                    // Preselection: default to current staff if eligible, otherwise first eligible available attendant in queue
+                                    $isMyStaffEligible = isset($myStaffProfile) && $myStaffProfile->canPerformService($srv);
+                                    $defaultStaffId = $isMyStaffEligible
+                                        ? $myStaffProfile->id
+                                        : ($eligibleAvailable->first()->id ?? ($eligibleBusy->first()->id ?? null));
+
+                                    // Specialization badge
+                                    $catSlugLower = strtolower($cat->slug ?? '');
+                                    $srvNameLower = strtolower($srv->name ?? '');
+                                    $isNail = str_contains($catSlugLower, 'nail') || str_contains($srvNameLower, 'nail') || str_contains($srvNameLower, 'manicure') || str_contains($srvNameLower, 'pedicure');
+                                    $isMass = str_contains($catSlugLower, 'mass') || str_contains($srvNameLower, 'massage') || str_contains($srvNameLower, 'reflexology') || str_contains($srvNameLower, 'ventosa');
+                                @endphp
                                 <div id="service_row_{{ $srv->id }}" class="p-3 sm:p-3.5 rounded-2xl bg-stone-50/60 border border-stone-200/80 hover:border-emerald-300 hover:bg-emerald-50/30 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                     <label class="flex items-start space-x-2.5 cursor-pointer flex-1 min-w-0">
                                         <input type="checkbox" name="services[{{ $srv->id }}][service_id]" value="{{ $srv->id }}" 
@@ -121,17 +160,32 @@
                                             class="srv-checkbox rounded-md text-emerald-700 focus:ring-emerald-500 w-4 h-4 mt-0.5 border-stone-300">
                                         <div class="min-w-0">
                                             <span class="font-extrabold text-stone-900 text-xs sm:text-sm block truncate">{{ $srv->name }}</span>
-                                            <span class="text-[10px] text-stone-500 flex items-center space-x-1 mt-0.5">
-                                                <i data-lucide="clock" class="w-3 h-3 text-stone-400"></i>
-                                                <span>{{ $srv->estimated_duration_minutes }} mins</span>
-                                            </span>
+                                            <div class="flex items-center space-x-2 mt-0.5">
+                                                <span class="text-[10px] text-stone-500 flex items-center space-x-1">
+                                                    <i data-lucide="clock" class="w-3 h-3 text-stone-400"></i>
+                                                    <span>{{ $srv->estimated_duration_minutes }} mins</span>
+                                                </span>
+                                                @if($isNail)
+                                                    <span class="px-1.5 py-0.2 rounded text-[9px] font-extrabold uppercase bg-rose-50 text-rose-700 border border-rose-200">
+                                                        Nail Care
+                                                    </span>
+                                                @elseif($isMass)
+                                                    <span class="px-1.5 py-0.2 rounded text-[9px] font-extrabold uppercase bg-sky-50 text-sky-700 border border-sky-200">
+                                                        Massage
+                                                    </span>
+                                                @else
+                                                    <span class="px-1.5 py-0.2 rounded text-[9px] font-extrabold uppercase bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                                        All-Around / Combo
+                                                    </span>
+                                                @endif
+                                            </div>
                                         </div>
                                     </label>
 
                                     <div class="flex items-center space-x-3 self-end sm:self-center flex-shrink-0">
                                         <span class="text-xs sm:text-sm font-black text-emerald-800">₱{{ number_format($srv->price, 2) }}</span>
 
-                                        <!-- Custom Themed Staff Dropdown -->
+                                        <!-- Custom Themed Staff Dropdown (Restricted to Eligible Staff) -->
                                         <div class="relative w-56 sm:w-64">
                                             <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-emerald-700">
                                                 <i data-lucide="user-check" class="w-3.5 h-3.5"></i>
@@ -141,12 +195,12 @@
                                                 class="staff-select w-full pl-8 pr-8 py-2 text-xs font-bold rounded-xl bg-white border-2 border-stone-200 text-stone-700 shadow-2xs appearance-none transition-all duration-200 focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 disabled:bg-stone-100/80 disabled:border-stone-200 disabled:text-stone-400 disabled:shadow-none disabled:cursor-not-allowed">
                                                 <option value="">-- Assign Attendant --</option>
                                                 
-                                                @if(isset($availableStaff) && $availableStaff->isNotEmpty())
+                                                @if($eligibleAvailable->isNotEmpty())
                                                     <optgroup label="Available Queue (Priority Turn)" class="font-bold text-emerald-900 bg-emerald-50 py-1">
-                                                        @foreach($availableStaff as $idx => $staff)
+                                                        @foreach($eligibleAvailable as $idx => $staff)
                                                             @php
                                                                 $turn = $idx + 1;
-                                                                $isSelected = (isset($myStaffProfile) && $myStaffProfile->id == $staff->id) || (!isset($myStaffProfile) && $turn === 1);
+                                                                $isSelected = ($staff->id == $defaultStaffId);
                                                             @endphp
                                                             <option value="{{ $staff->id }}" {{ $isSelected ? 'selected' : '' }} class="text-stone-900 font-bold py-1.5 bg-white">
                                                                 {{ $turn === 1 ? 'Turn #1 (Next in line)' : 'Turn #' . $turn }} - {{ $staff->nickname ?? $staff->name }} ({{ ucfirst(str_replace('_', ' ', $staff->specialization)) }})
@@ -155,14 +209,20 @@
                                                     </optgroup>
                                                 @endif
 
-                                                @if(isset($busyStaff) && $busyStaff->isNotEmpty())
+                                                @if($eligibleBusy->isNotEmpty())
                                                     <optgroup label="Busy / On Break / Off-Duty" class="font-bold text-stone-500 bg-stone-100 py-1">
-                                                        @foreach($busyStaff as $staff)
-                                                            <option value="{{ $staff->id }}" {{ (isset($myStaffProfile) && $myStaffProfile->id == $staff->id) ? 'selected' : '' }} class="text-stone-500 font-normal py-1 bg-stone-50">
+                                                        @foreach($eligibleBusy as $staff)
+                                                            <option value="{{ $staff->id }}" {{ ($staff->id == $defaultStaffId) ? 'selected' : '' }} class="text-stone-500 font-normal py-1 bg-stone-50">
                                                                 {{ $staff->nickname ?? $staff->name }} ({{ ucfirst(str_replace('_', ' ', $staff->status)) }})
                                                             </option>
                                                         @endforeach
                                                     </optgroup>
+                                                @endif
+
+                                                @if($eligibleAvailable->isEmpty() && $eligibleBusy->isEmpty())
+                                                    <option value="" disabled selected class="text-stone-400">
+                                                        No qualified staff registered for this service
+                                                    </option>
                                                 @endif
                                             </select>
 
@@ -175,7 +235,11 @@
                             @endforeach
                         </div>
                     </div>
-                @endforeach
+                @empty
+                    <div class="p-6 text-center text-xs text-stone-500 bg-stone-50 rounded-2xl border border-stone-200">
+                        No services configured for your role specialization. Please contact your administrator.
+                    </div>
+                @endforelse
             </div>
         </div>
 

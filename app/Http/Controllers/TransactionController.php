@@ -37,12 +37,25 @@ class TransactionController extends Controller
 
     public function create()
     {
-        $categories = ServiceCategory::where('is_active', true)
+        $user = Auth::user();
+        $isStaff = $user && $user->role === 'staff';
+        $myStaffProfile = StaffProfile::where('user_id', Auth::id())->first();
+
+        // Base categories with active services
+        $categoriesQuery = ServiceCategory::where('is_active', true)
             ->with(['services' => function ($q) {
                 $q->where('is_active', true)->orderBy('price');
             }])
-            ->orderBy('display_order')
-            ->get();
+            ->orderBy('display_order');
+
+        $categories = $categoriesQuery->get();
+
+        // If employee is logged in, only show services for their specialization (All-Around sees all)
+        if ($isStaff && $myStaffProfile && $myStaffProfile->specialization !== 'all_around') {
+            $categories = $categories->filter(function ($cat) use ($myStaffProfile) {
+                return $myStaffProfile->isQualifiedForCategory($cat);
+            });
+        }
 
         // 1. Strictly prioritize Available staff sorted by fair queue position (Turn #1, #2, etc.)
         $availableStaff = StaffProfile::where('is_active', true)
@@ -58,9 +71,8 @@ class TransactionController extends Controller
             ->get();
 
         $staffList = $availableStaff->concat($busyStaff);
-        $myStaffProfile = StaffProfile::where('user_id', Auth::id())->first();
 
-        return view('transactions.create', compact('categories', 'staffList', 'availableStaff', 'busyStaff', 'myStaffProfile'));
+        return view('transactions.create', compact('categories', 'staffList', 'availableStaff', 'busyStaff', 'myStaffProfile', 'isStaff'));
     }
 
     public function store(Request $request, PayMongoService $payMongo)
@@ -89,8 +101,16 @@ class TransactionController extends Controller
             $itemsData = [];
 
             foreach ($request->input('services') as $srvInput) {
-                $service = Service::findOrFail($srvInput['service_id']);
+                $service = Service::with('category')->findOrFail($srvInput['service_id']);
                 $staff = StaffProfile::findOrFail($srvInput['staff_id']);
+
+                // Strict Role Validation: Staff must be qualified to perform this service
+                if (!$staff->canPerformService($service)) {
+                    $staffRole = ucfirst(str_replace('_', ' ', $staff->specialization));
+                    throw \Illuminate\Validation\ValidationException::withMessages([
+                        'services' => ["Cannot assign '{$service->name}' to {$staff->nickname} ({$staffRole}). Attendants can only perform services matching their specialization."]
+                    ]);
+                }
 
                 $price = (float) $service->price;
                 $commRate = (float) $staff->commission_rate;

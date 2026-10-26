@@ -14,6 +14,9 @@ class ServiceMenuController extends Controller
      */
     public function index()
     {
+        $user = Auth::user();
+        $myProfile = ($user && $user->role === 'staff') ? $user->staffProfile : null;
+
         $categories = ServiceCategory::where('is_active', true)
             ->with(['services' => function ($q) {
                 $q->where('is_active', true)->orderBy('price', 'asc');
@@ -21,7 +24,7 @@ class ServiceMenuController extends Controller
             ->orderBy('display_order')
             ->get();
 
-        return view('menu.index', compact('categories'));
+        return view('menu.index', compact('categories', 'myProfile'));
     }
 
     /**
