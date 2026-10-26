@@ -53,6 +53,7 @@ class PayoutController extends Controller
         $netTransfer = max(0, $requestedAmount - $transferFee);
 
         $referenceNo = Payout::generateReferenceNo();
+        $poutSimId = 'pout_sim_' . uniqid();
 
         Payout::create([
             'reference_no' => $referenceNo,
@@ -67,12 +68,22 @@ class PayoutController extends Controller
             'account_number' => $request->account_number,
             'bank_name' => $request->bank_name,
             'status' => 'completed',
-            'paymongo_payout_id' => 'pout_sim_' . uniqid(),
+            'paymongo_payout_id' => $poutSimId,
             'notes' => 'PayMongo Test Mode Simulated Payout. Dispatched to ' . strtoupper($request->payout_method),
             'completed_at' => now(),
         ]);
 
-        return back()->with('success', "Cashout request #{$referenceNo} of ₱" . number_format($netTransfer, 2) . " to {$request->account_name} ({$request->account_number}) was processed successfully via PayMongo!");
+        return back()
+            ->with('success', "Cashout request #{$referenceNo} of ₱" . number_format($netTransfer, 2) . " to {$request->account_name} was processed successfully via PayMongo!")
+            ->with('payout_receipt', [
+                'reference_no' => $referenceNo,
+                'amount' => $netTransfer,
+                'payout_method' => strtoupper($request->payout_method) . ($request->bank_name ? " ({$request->bank_name})" : ''),
+                'account_name' => $request->account_name,
+                'account_number' => $request->account_number,
+                'paymongo_payout_id' => $poutSimId,
+                'completed_at' => now()->format('M d, Y • h:i A'),
+            ]);
     }
 
     /**

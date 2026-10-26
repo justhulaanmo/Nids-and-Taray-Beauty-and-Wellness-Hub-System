@@ -192,90 +192,183 @@
     <!-- ADMIN OVERVIEW SECTION (Financials & Queue)-->
     <!-- ========================================== -->
     @if(Auth::user()->role === 'admin')
-        <!-- Shop Net Profit & PayMongo Cashout Hero Card -->
-        <div class="bg-gradient-to-br from-emerald-900 via-teal-900 to-emerald-950 text-white rounded-3xl p-5 sm:p-6 shadow-md border border-emerald-800 space-y-4">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-white/10 pb-3">
-                <div class="flex items-center space-x-2.5">
-                    <span class="w-9 h-9 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center shrink-0">
-                        <i data-lucide="wallet" class="w-5 h-5 text-emerald-300"></i>
-                    </span>
-                    <div>
-                        <h3 class="text-sm sm:text-base font-black tracking-tight text-white flex items-center space-x-2">
-                            <span>Shop Net Earnings & Cashout</span>
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
-                                PayMongo Test Mode
-                            </span>
-                        </h3>
-                        <p class="text-[11px] text-emerald-100/70">
-                            Clean salon revenue after deducting staff commissions and PayMongo 2.5% gateway fees.
-                        </p>
+        <!-- Monthly Net Profit & Expense Tracker Hero Card -->
+        <div class="bg-gradient-to-br from-stone-900 via-emerald-950 to-stone-900 text-white rounded-3xl p-5 sm:p-6 shadow-md border border-emerald-800/60 space-y-5">
+            <!-- Header with Month Selector & Action Buttons -->
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 border-b border-white/10 pb-4">
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center shrink-0">
+                            <i data-lucide="calculator" class="w-4 h-4 text-emerald-300"></i>
+                        </span>
+                        <h2 class="text-base sm:text-lg font-black tracking-tight text-white flex items-center space-x-2">
+                            <span>Monthly Net Profit & Expense Tracker</span>
+                        </h2>
                     </div>
+                    <p class="text-[11px] text-stone-300 mt-1">
+                        Gross Sales &minus; Deductions (Commissions & Gateway Fees) = <strong class="text-emerald-300">Gross Profit</strong> &minus; Total OPEX (Rent, Bills, Supplies) = <strong class="text-emerald-200">True Net Profit</strong>.
+                    </p>
                 </div>
 
-                <!-- Cashout Trigger Button -->
-                <div>
+                <div class="flex flex-wrap items-center gap-2 self-start lg:self-auto">
+                    <!-- Month Selector -->
+                    <form method="GET" action="{{ route('dashboard') }}" class="flex items-center space-x-1.5 bg-white/10 p-1.5 rounded-2xl border border-white/15">
+                        <span class="text-[11px] font-bold text-emerald-200 pl-1.5">Month:</span>
+                        <input type="month" name="month" value="{{ $selectedMonth }}" onchange="this.form.submit()"
+                            class="px-2.5 py-1 text-xs font-bold bg-white text-stone-900 rounded-xl border-none focus:outline-hidden">
+                    </form>
+
+                    <!-- Add Expense Button -->
+                    <button type="button" onclick="openExpenseModal()"
+                        class="px-3.5 py-2 rounded-2xl bg-white/15 hover:bg-white/20 text-white border border-white/20 font-black text-xs shadow-xs transition active:scale-95 flex items-center space-x-1.5">
+                        <i data-lucide="plus-circle" class="w-4 h-4 text-emerald-300"></i>
+                        <span>+ Add Expense</span>
+                    </button>
+
+                    <!-- Cashout Button -->
                     <button type="button" onclick="openAdminCashoutModal()"
-                        class="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-stone-950 font-black text-xs shadow-md transition-all active:scale-95 flex items-center space-x-2">
+                        class="px-3.5 py-2 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-stone-950 font-black text-xs shadow-xs transition active:scale-95 flex items-center space-x-1.5">
                         <i data-lucide="arrow-up-right" class="w-4 h-4 text-stone-950"></i>
-                        <span>Cashout / Withdraw</span>
+                        <span>Cashout (₱{{ number_format($availableForCashout, 0) }})</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Balances Row -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <!-- Available for Cashout -->
-                <div class="p-3.5 bg-white/10 rounded-2xl border border-white/10 backdrop-blur-xs">
-                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-200 block">Available for Cashout</span>
-                    <span class="text-2xl sm:text-3xl font-black text-white block mt-0.5">
-                        ₱{{ number_format($availableForCashout, 2) }}
+            <!-- Financial Formula 5-Card Grid -->
+            <div class="grid grid-cols-2 lg:grid-cols-5 gap-2.5">
+                <!-- 1. Gross Sales -->
+                <div class="p-3.5 bg-white/5 rounded-2xl border border-white/10">
+                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-stone-300 block">1. Gross Sales</span>
+                    <span class="text-xl sm:text-2xl font-black text-white block mt-0.5">
+                        ₱{{ number_format($monthGrossSales, 2) }}
                     </span>
-                    <span class="text-[10px] text-emerald-200/80 block mt-0.5">
-                        All-time net profit minus withdrawn (₱{{ number_format($totalCashedOut, 2) }})
-                    </span>
+                    <span class="text-[10px] text-stone-400 block mt-0.5">All client payments</span>
                 </div>
 
-                <!-- Today's Net Profit (Clean Shop Share) -->
-                <div class="p-3.5 bg-emerald-800/40 rounded-2xl border border-emerald-400/20 backdrop-blur-xs">
-                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-300 block">Today's Net Shop Profit</span>
-                    <span class="text-2xl sm:text-3xl font-black text-emerald-200 block mt-0.5">
-                        ₱{{ number_format($todayNetShopProfit, 2) }}
+                <!-- 2. Total Deductions -->
+                <div class="p-3.5 bg-white/5 rounded-2xl border border-white/10">
+                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-amber-300 block">2. Total Deductions</span>
+                    <span class="text-xl sm:text-2xl font-black text-amber-200 block mt-0.5">
+                        -₱{{ number_format($monthTotalDeductions, 2) }}
                     </span>
-                    <span class="text-[10px] text-emerald-100/70 block mt-0.5">
-                        Gross (₱{{ number_format($totalSalesToday, 2) }}) less Commission & Fees
-                    </span>
+                    <span class="text-[10px] text-stone-400 block mt-0.5">Comm: ₱{{ number_format($monthCommissions, 0) }} &bull; Fee: ₱{{ number_format($monthPaymongoFees, 0) }}</span>
                 </div>
 
-                <!-- Today's Fee & Commission Breakdown -->
-                <div class="p-3 bg-white/5 rounded-2xl border border-white/10 text-xs space-y-1">
-                    <div class="flex justify-between text-emerald-100/70 text-[11px]">
-                        <span>Gross Sales (Today):</span>
-                        <span class="font-bold text-white">₱{{ number_format($totalSalesToday, 2) }}</span>
+                <!-- 3. Gross Profit -->
+                <div class="p-3.5 bg-white/5 rounded-2xl border border-white/10">
+                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-300 block">3. Gross Profit</span>
+                    <span class="text-xl sm:text-2xl font-black text-emerald-200 block mt-0.5">
+                        ₱{{ number_format($monthGrossProfit, 2) }}
+                    </span>
+                    <span class="text-[10px] text-stone-400 block mt-0.5">Shop share from sales</span>
+                </div>
+
+                <!-- 4. Total OPEX (Expenses) -->
+                <div class="p-3.5 bg-white/5 rounded-2xl border border-white/10">
+                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-rose-300 block">4. Total OPEX</span>
+                    <span class="text-xl sm:text-2xl font-black text-rose-200 block mt-0.5">
+                        -₱{{ number_format($monthTotalOPEX, 2) }}
+                    </span>
+                    <span class="text-[10px] text-stone-400 block mt-0.5">Rent, Bills, Supplies</span>
+                </div>
+
+                <!-- 5. TRUE NET PROFIT (HERO CARD) -->
+                <div class="col-span-2 lg:col-span-1 p-3.5 rounded-2xl border {{ $monthTrueNetProfit >= 0 ? 'bg-emerald-600/30 border-emerald-400/50 text-emerald-100' : 'bg-rose-600/30 border-rose-400/50 text-rose-100' }}">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-black uppercase tracking-wider block">5. True Net Profit</span>
+                        <span class="text-[9px] font-bold px-1.5 py-0.2 rounded uppercase {{ $monthTrueNetProfit >= 0 ? 'bg-emerald-400/30 text-emerald-200' : 'bg-rose-400/30 text-rose-200' }}">
+                            {{ $monthTrueNetProfit >= 0 ? 'May Tubo' : 'Deficit' }}
+                        </span>
                     </div>
-                    <div class="flex justify-between text-amber-300 text-[11px]">
-                        <span>Less Staff Commission:</span>
-                        <span class="font-bold">-₱{{ number_format($todayCommissions, 2) }}</span>
-                    </div>
-                    <div class="flex justify-between text-rose-300 text-[11px]">
-                        <span>Less PayMongo Fee (2.5%):</span>
-                        <span class="font-bold">-₱{{ number_format($todayPaymongoFees, 2) }}</span>
-                    </div>
-                    <div class="pt-1 border-t border-white/10 flex justify-between text-emerald-200 font-extrabold text-[11px]">
-                        <span>Net Shop Takehome:</span>
-                        <span>₱{{ number_format($todayNetShopProfit, 2) }}</span>
-                    </div>
+                    <span class="text-2xl font-black block mt-0.5 {{ $monthTrueNetProfit >= 0 ? 'text-white' : 'text-rose-200' }}">
+                        {{ $monthTrueNetProfit < 0 ? '-' : '' }}₱{{ number_format(abs($monthTrueNetProfit), 2) }}
+                    </span>
+                    <span class="text-[10px] block mt-0.5 {{ $monthTrueNetProfit >= 0 ? 'text-emerald-200/90' : 'text-rose-200/90' }}">
+                        {{ $monthTrueNetProfit >= 0 ? 'Malinis na kita ng shop' : 'Kulang sa bayad ng gastusin' }}
+                    </span>
                 </div>
             </div>
 
-            @if(isset($recentPayouts) && $recentPayouts->isNotEmpty())
-                <div class="pt-2 border-t border-white/10 text-xs flex flex-wrap items-center justify-between gap-2">
-                    <span class="text-[11px] text-emerald-200/80 font-bold flex items-center space-x-1.5">
-                        <i data-lucide="history" class="w-3.5 h-3.5"></i>
-                        <span>Recent Cashout: {{ $recentPayouts->first()->reference_no }} &bull; ₱{{ number_format($recentPayouts->first()->net_amount, 2) }} to {{ strtoupper($recentPayouts->first()->payout_method) }}</span>
-                    </span>
-                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/30 text-emerald-200 font-extrabold">
-                        {{ ucfirst($recentPayouts->first()->status) }}
-                    </span>
+            <!-- Recent Cashout & Available for Withdrawal Status Bar -->
+            <div class="pt-2 border-t border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs">
+                <div class="flex items-center space-x-2">
+                    <span class="text-stone-300 font-medium">Available for Bank/E-Wallet Cashout:</span>
+                    <span class="font-black text-emerald-300 text-sm">₱{{ number_format($availableForCashout, 2) }}</span>
+                    <span class="text-stone-400 text-[10px]">(All-time net profit minus withdrawn: ₱{{ number_format($totalCashedOut, 2) }})</span>
+                </div>
+
+                @if(isset($recentPayouts) && $recentPayouts->isNotEmpty())
+                    <div class="flex items-center space-x-2">
+                        <span class="text-stone-300 text-[11px]">Last Cashout: #{{ $recentPayouts->first()->reference_no }} (₱{{ number_format($recentPayouts->first()->net_amount, 2) }} to {{ strtoupper($recentPayouts->first()->payout_method) }})</span>
+                        <!-- Quick Void for Testing Button -->
+                        <form action="{{ route('payouts.void', $recentPayouts->first()->id) }}" method="POST" onsubmit="return confirm('Void this test payout and restore ₱{{ number_format($recentPayouts->first()->gross_amount, 2) }} back to your available balance for testing?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="px-2 py-0.5 rounded bg-amber-400/20 hover:bg-amber-400/30 text-amber-200 text-[10px] font-bold border border-amber-300/30 transition">
+                                Void for Re-test
+                            </button>
+                        </form>
+                    </div>
+                @endif
+            </div>
+        </div>
+
+        <!-- Monthly Operating Expenses (OPEX) List -->
+        <div class="bg-white rounded-3xl border border-stone-200 p-4 sm:p-5 shadow-2xs space-y-3">
+            <div class="flex items-center justify-between border-b border-stone-100 pb-3">
+                <div class="flex items-center space-x-2">
+                    <i data-lucide="receipt" class="w-4 h-4 text-emerald-800"></i>
+                    <h3 class="text-xs font-black uppercase tracking-wider text-stone-900">
+                        Monthly Operating Expenses Log ({{ \Carbon\Carbon::parse($selectedMonth . '-01')->format('F Y') }})
+                    </h3>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-xs font-bold text-stone-600">Total OPEX:</span>
+                    <span class="text-sm font-black text-rose-700">₱{{ number_format($monthTotalOPEX, 2) }}</span>
+                </div>
+            </div>
+
+            @if($monthExpensesList->isEmpty())
+                <div class="p-6 text-center text-xs text-stone-400 space-y-2">
+                    <i data-lucide="file-spreadsheet" class="w-8 h-8 text-stone-300 mx-auto"></i>
+                    <div class="font-bold text-stone-700">No expenses recorded for {{ \Carbon\Carbon::parse($selectedMonth . '-01')->format('F Y') }} yet.</div>
+                    <div class="text-[11px] text-stone-500">
+                        Click <button type="button" onclick="openExpenseModal()" class="text-emerald-700 font-bold underline">+ Add Expense</button> to record Rent, Electricity, Water, WiFi, or Supplies.
+                    </div>
+                </div>
+            @else
+                <div class="divide-y divide-stone-100">
+                    @foreach($monthExpensesList as $exp)
+                        <div class="py-2.5 flex items-center justify-between text-xs hover:bg-stone-50/60 px-2 rounded-xl transition">
+                            <div class="space-y-0.5">
+                                <div class="flex items-center space-x-2">
+                                    <span class="font-extrabold text-stone-900 text-sm">{{ $exp->description }}</span>
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase
+                                        {{ $exp->category === 'Rent' ? 'bg-purple-100 text-purple-800' : '' }}
+                                        {{ $exp->category === 'Utilities' ? 'bg-sky-100 text-sky-800' : '' }}
+                                        {{ $exp->category === 'Supplies' ? 'bg-emerald-100 text-emerald-800' : '' }}
+                                        {{ $exp->category === 'Others' ? 'bg-stone-100 text-stone-800' : '' }}
+                                    ">
+                                        {{ $exp->category }}
+                                    </span>
+                                </div>
+                                <span class="text-[11px] text-stone-400">Date: {{ $exp->expense_date->format('M d, Y') }}</span>
+                            </div>
+
+                            <div class="flex items-center space-x-3">
+                                <span class="font-black text-rose-700 text-sm">
+                                    -₱{{ number_format($exp->amount, 2) }}
+                                </span>
+                                <form action="{{ route('expenses.destroy', $exp->id) }}" method="POST" onsubmit="return confirm('Delete expense {{ $exp->description }}?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="p-1 rounded-lg text-stone-400 hover:text-rose-600 hover:bg-rose-50 transition" title="Delete Expense">
+                                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
             @endif
         </div>
@@ -511,12 +604,130 @@
                 </form>
             </div>
         </div>
+        <!-- Add Operational Expense Modal -->
+        <div id="addExpenseModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl border border-stone-200 shadow-xl max-w-md w-full p-6 space-y-4 relative animate-in fade-in zoom-in-95 duration-150">
+                <div class="flex items-center justify-between border-b border-stone-100 pb-3">
+                    <div class="flex items-center space-x-2.5">
+                        <div class="w-8 h-8 rounded-xl bg-rose-100 text-rose-800 flex items-center justify-center shrink-0">
+                            <i data-lucide="receipt" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm sm:text-base font-black text-stone-900">Record Operational Expense</h3>
+                            <p class="text-[11px] text-stone-500 font-semibold">Rent, utilities, supplies, or salon bills</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="closeExpenseModal()" class="p-1 rounded-xl text-stone-400 hover:text-stone-700 hover:bg-stone-100">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+
+                <form action="{{ route('expenses.store') }}" method="POST" class="space-y-3.5">
+                    @csrf
+
+                    <div>
+                        <label class="block text-xs font-bold text-stone-700 mb-1">Expense Category *</label>
+                        <select name="category" required class="w-full px-3.5 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-xs font-bold text-stone-900 focus:bg-white focus:outline-hidden">
+                            <option value="Rent">Rent (Upa sa Pwesto)</option>
+                            <option value="Utilities" selected>Utilities (Kuryente, Tubig, WiFi)</option>
+                            <option value="Supplies">Supplies (Shampoo, Lotion, Polish, Towels)</option>
+                            <option value="Others">Others (Maintenance, Cleaning, Etc.)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-stone-700 mb-1">Description / Bill Name *</label>
+                        <input type="text" name="description" required placeholder="e.g. Meralco Electric Bill, PLDT WiFi, October Rent"
+                            class="w-full px-3.5 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-xs font-bold text-stone-900 focus:bg-white focus:outline-hidden">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <div>
+                            <label class="block text-xs font-bold text-stone-700 mb-1">Amount (₱) *</label>
+                            <input type="number" step="0.01" min="1" name="amount" required placeholder="0.00"
+                                class="w-full px-3.5 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-sm font-black text-stone-900 focus:bg-white focus:outline-hidden">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-stone-700 mb-1">Expense Date *</label>
+                            <input type="date" name="expense_date" value="{{ now()->toDateString() }}" required
+                                class="w-full px-3.5 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-xs font-bold text-stone-900 focus:bg-white focus:outline-hidden">
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="submit"
+                            class="w-full py-3.5 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-black text-xs shadow-md transition-all active:scale-[0.98] flex items-center justify-center space-x-2">
+                            <i data-lucide="check-circle" class="w-4 h-4"></i>
+                            <span>Save Expense Record</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- PayMongo Admin Payout Receipt Modal -->
+        @if(session('payout_receipt'))
+            @php $receipt = session('payout_receipt'); @endphp
+            <div id="payoutReceiptModal" class="fixed inset-0 z-50 overflow-y-auto bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+                <div class="bg-white rounded-3xl border border-stone-200 shadow-2xl max-w-sm w-full p-6 text-center space-y-4 animate-in fade-in zoom-in-95 duration-200">
+                    <div class="w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 mx-auto flex items-center justify-center">
+                        <i data-lucide="check" class="w-8 h-8 stroke-[3]"></i>
+                    </div>
+
+                    <div>
+                        <span class="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800">
+                            PayMongo Disbursements (Test Mode)
+                        </span>
+                        <h3 class="text-xl font-black text-stone-900 mt-2">Cashout Dispatched!</h3>
+                        <p class="text-xs text-stone-500">Transferred directly to your {{ $receipt['payout_method'] }} account</p>
+                    </div>
+
+                    <div class="bg-stone-50 rounded-2xl p-4 border border-stone-200 text-xs space-y-2 text-left">
+                        <div class="flex justify-between">
+                            <span class="text-stone-500 font-medium">Reference:</span>
+                            <span class="font-mono font-bold text-stone-900">{{ $receipt['reference_no'] }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-stone-500 font-medium">Channel:</span>
+                            <span class="font-bold text-stone-900">{{ $receipt['payout_method'] }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-stone-500 font-medium">Recipient:</span>
+                            <span class="font-bold text-stone-900">{{ $receipt['account_name'] }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-stone-500 font-medium">Account / Mobile:</span>
+                            <span class="font-mono font-bold text-stone-900">{{ $receipt['account_number'] }}</span>
+                        </div>
+                        <div class="border-t border-stone-200 pt-2 flex justify-between items-baseline">
+                            <span class="text-stone-700 font-bold">Total Transferred:</span>
+                            <span class="text-lg font-black text-emerald-800">₱{{ number_format($receipt['amount'], 2) }}</span>
+                        </div>
+                    </div>
+
+                    <button type="button" onclick="document.getElementById('payoutReceiptModal').remove()"
+                        class="w-full py-3 px-4 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-black text-xs shadow-xs transition active:scale-95">
+                        Close Receipt
+                    </button>
+                </div>
+            </div>
+        @endif
     @endif
 
 </div>
 
 @push('scripts')
 <script>
+    function openExpenseModal() {
+        const modal = document.getElementById('addExpenseModal');
+        if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeExpenseModal() {
+        const modal = document.getElementById('addExpenseModal');
+        if (modal) modal.classList.add('hidden');
+    }
+
     function openAdminCashoutModal() {
         const modal = document.getElementById('adminCashoutModal');
         if (modal) modal.classList.remove('hidden');

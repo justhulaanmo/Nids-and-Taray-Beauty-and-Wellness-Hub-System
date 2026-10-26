@@ -45,6 +45,46 @@ class DashboardController extends Controller
         })->sum('staff_commission_amount');
         $todayNetShopProfit = max(0, $totalSalesToday - $todayCommissions - $todayPaymongoFees);
 
+        // Monthly Net Profit & Expense Tracker Calculation
+        $selectedMonth = request('month', Carbon::now()->format('Y-m'));
+        $monthDate = Carbon::parse($selectedMonth . '-01');
+        $monthYear = $monthDate->year;
+        $monthNum = $monthDate->month;
+
+        $monthTransactions = Transaction::whereYear('created_at', $monthYear)
+            ->whereMonth('created_at', $monthNum)
+            ->where('payment_status', 'paid')
+            ->where('status', '!=', 'cancelled')
+            ->get();
+
+        $monthGrossSales = (float) $monthTransactions->sum('total_amount');
+        $monthQR = (float) $monthTransactions->whereIn('payment_method', ['paymongo_qr', 'paymongo_link'])->sum('total_amount');
+        $monthPaymongoFees = round($monthQR * 0.025, 2);
+        
+        $monthCommissions = (float) TransactionItem::whereHas('transaction', function ($q) use ($monthYear, $monthNum) {
+            $q->whereYear('created_at', $monthYear)
+              ->whereMonth('created_at', $monthNum)
+              ->where('payment_status', 'paid')
+              ->where('status', '!=', 'cancelled');
+        })->sum('staff_commission_amount');
+
+        // Total Deductions = Staff Commissions + PayMongo Fees
+        $monthTotalDeductions = $monthCommissions + $monthPaymongoFees;
+
+        // Gross Profit = Gross Sales - Total Deductions
+        $monthGrossProfit = max(0, $monthGrossSales - $monthTotalDeductions);
+
+        // Operational Expenses (OPEX) for selected month
+        $monthExpensesList = \App\Models\Expense::whereYear('expense_date', $monthYear)
+            ->whereMonth('expense_date', $monthNum)
+            ->latest('expense_date')
+            ->get();
+
+        $monthTotalOPEX = (float) $monthExpensesList->sum('amount');
+
+        // True Net Profit = Gross Profit - Total OPEX
+        $monthTrueNetProfit = $monthGrossProfit - $monthTotalOPEX;
+
         // All-Time Payout / Cashout Metrics (for Admin Cashout Button)
         $allTimePaidTransactions = Transaction::where('payment_status', 'paid')->where('status', '!=', 'cancelled')->get();
         $allTimeGross = (float) $allTimePaidTransactions->sum('total_amount');
@@ -154,6 +194,15 @@ class DashboardController extends Controller
             'todayPaymongoFees',
             'todayCommissions',
             'todayNetShopProfit',
+            'selectedMonth',
+            'monthGrossSales',
+            'monthCommissions',
+            'monthPaymongoFees',
+            'monthTotalDeductions',
+            'monthGrossProfit',
+            'monthExpensesList',
+            'monthTotalOPEX',
+            'monthTrueNetProfit',
             'allTimeGross',
             'allTimePaymongoFees',
             'allTimeCommissions',

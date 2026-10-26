@@ -68,4 +68,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/payouts/admin', [\App\Http\Controllers\PayoutController::class, 'storeAdminPayout'])->name('payouts.admin');
     Route::post('/payouts/staff', [\App\Http\Controllers\PayoutController::class, 'storeStaffPayout'])->name('payouts.staff');
     Route::delete('/payouts/{id}/void', [\App\Http\Controllers\PayoutController::class, 'voidPayout'])->name('payouts.void');
+
+    // 9. Shop Expenses & Monthly Overhead (Rent, Electricity, Water, WiFi, Supplies)
+    Route::post('/expenses', [\App\Http\Controllers\ExpenseController::class, 'store'])->name('expenses.store');
+    Route::delete('/expenses/{id}', [\App\Http\Controllers\ExpenseController::class, 'destroy'])->name('expenses.destroy');
 });
