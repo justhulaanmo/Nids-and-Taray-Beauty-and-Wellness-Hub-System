@@ -16,7 +16,28 @@ class TransactionController extends Controller
 {
     public function index(Request $request)
     {
+        $user = Auth::user();
+        $staffProfile = null;
+        $isStaff = false;
+
+        if ($user && $user->role !== 'admin') {
+            $isStaff = true;
+            $staffProfile = StaffProfile::where('user_id', $user->id)->first();
+        }
+
         $query = Transaction::with(['items.service', 'items.staff', 'creator']);
+
+        // Strict Role Isolation: If employee is logged in, ONLY show transactions where they are an assigned attendant
+        if ($isStaff && $staffProfile) {
+            $query->whereHas('items', function ($q) use ($staffProfile) {
+                $q->where('staff_id', $staffProfile->id);
+            });
+        } elseif (!$isStaff && $request->filled('staff_id')) {
+            // Admin filtering by specific staff
+            $query->whereHas('items', function ($q) use ($request) {
+                $q->where('staff_id', $request->staff_id);
+            });
+        }
 
         if ($request->filled('date')) {
             $query->whereDate('created_at', $request->date);
@@ -31,8 +52,9 @@ class TransactionController extends Controller
         }
 
         $transactions = $query->latest()->paginate(15)->withQueryString();
+        $allStaff = (!$isStaff) ? StaffProfile::where('is_active', true)->orderBy('name')->get() : collect();
 
-        return view('transactions.index', compact('transactions'));
+        return view('transactions.index', compact('transactions', 'isStaff', 'staffProfile', 'allStaff'));
     }
 
     public function create()
@@ -197,14 +219,23 @@ class TransactionController extends Controller
         });
     }
 
-    public function show($id)
+    public function show(int|string $id)
     {
+        $user = Auth::user();
         $transaction = Transaction::with(['items.service', 'items.staff', 'creator'])->findOrFail($id);
+
+        if ($user && $user->role !== 'admin') {
+            $staffProfile = StaffProfile::where('user_id', $user->id)->first();
+            $isAssigned = $staffProfile && $transaction->items()->where('staff_id', $staffProfile->id)->exists();
+            if ($staffProfile && !$isAssigned) {
+                abort(403, 'Unauthorized. You can only view transactions where you were an assigned attendant.');
+            }
+        }
 
         return view('transactions.show', compact('transaction'));
     }
 
-    public function markPaid(Request $request, $id)
+    public function markPaid(Request $request, int|string $id)
     {
         $transaction = Transaction::findOrFail($id);
         $method = $request->input('payment_method', $transaction->payment_method);
@@ -221,7 +252,7 @@ class TransactionController extends Controller
         return back()->with('success', "Transaction #{$transaction->tracking_number} marked as Paid via {$label}!");
     }
 
-    public function updatePaymentMethod(Request $request, $id, PayMongoService $payMongo)
+    public function updatePaymentMethod(Request $request, int|string $id, PayMongoService $payMongo)
     {
         $request->validate([
             'payment_method' => 'required|in:cash,paymongo_qr',
@@ -234,10 +265,15 @@ class TransactionController extends Controller
         $checkoutId = $transaction->paymongo_checkout_id;
 
         if ($newMethod === 'paymongo_qr' && empty($checkoutUrl)) {
+            $checkoutItems = collect($transaction->items)->map(fn($i) => [
+                'name' => $i->service->name ?? 'Service',
+                'price' => $i->price
+            ])->all();
+
             $payResult = $payMongo->createCheckoutSession([
                 'transaction_id' => $transaction->id,
                 'tracking_number' => $transaction->tracking_number,
-                'items' => $transaction->items->map(fn($i) => ['name' => $i->service->name ?? 'Service', 'price' => $i->price])->toArray(),
+                'items' => $checkoutItems,
                 'home_service_fee' => $transaction->home_service_fee,
             ]);
 
@@ -258,7 +294,7 @@ class TransactionController extends Controller
         return back()->with('success', "Payment method updated to {$methodLabel}.");
     }
 
-    public function markCompleted($id)
+    public function markCompleted(int|string $id)
     {
         $transaction = Transaction::with('items.staff')->findOrFail($id);
 
