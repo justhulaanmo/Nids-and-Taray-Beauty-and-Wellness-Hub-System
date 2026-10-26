@@ -63,4 +63,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
     Route::patch('/profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
     Route::patch('/profile/password', [\App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('profile.password');
+
+    // 8. Payouts & Cashout (Shop Profit & Staff Commission)
+    Route::post('/payouts/admin', [\App\Http\Controllers\PayoutController::class, 'storeAdminPayout'])->name('payouts.admin');
+    Route::post('/payouts/staff', [\App\Http\Controllers\PayoutController::class, 'storeStaffPayout'])->name('payouts.staff');
 });

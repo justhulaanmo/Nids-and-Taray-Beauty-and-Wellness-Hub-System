@@ -60,6 +60,14 @@ class WalletController extends Controller
         // If there are QR payments, the shop received the money directly, so shop owes staff their QR commission
         $qrCommissionOwedToStaff = $qrItems->where('transaction.payment_status', 'paid')->sum('staff_commission_amount');
 
+        // All-Time Commission Balance & Cashouts
+        $totalEarnedAllTime = (float) TransactionItem::where('staff_id', $staffProfile->id)
+            ->whereHas('transaction', fn($q) => $q->where('payment_status', 'paid')->where('status', '!=', 'cancelled'))
+            ->sum('staff_commission_amount');
+        $totalStaffWithdrawn = (float) \App\Models\Payout::where('staff_id', $staffProfile->id)->where('status', 'completed')->sum('gross_amount');
+        $availableCommissionBalance = max(0, $totalEarnedAllTime - $totalStaffWithdrawn);
+        $staffPayouts = \App\Models\Payout::where('staff_id', $staffProfile->id)->latest()->take(5)->get();
+
         return view('wallet.index', compact(
             'staffProfile',
             'items',
@@ -70,7 +78,11 @@ class WalletController extends Controller
             'myTotalCommission',
             'cashCollected',
             'cashToRemitToShop',
-            'qrCommissionOwedToStaff'
+            'qrCommissionOwedToStaff',
+            'totalEarnedAllTime',
+            'totalStaffWithdrawn',
+            'availableCommissionBalance',
+            'staffPayouts'
         ));
     }
 }

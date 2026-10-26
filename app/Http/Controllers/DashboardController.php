@@ -38,6 +38,25 @@ class DashboardController extends Controller
         $cashSalesToday = $paidTransactions->where('payment_method', 'cash')->sum('total_amount');
         $qrSalesToday = $paidTransactions->whereIn('payment_method', ['paymongo_qr', 'paymongo_link'])->sum('total_amount');
 
+        // Net Revenue Calculations: Gross - Commissions - PayMongo Fees (2.5% on QR)
+        $todayPaymongoFees = round($qrSalesToday * 0.025, 2);
+        $todayCommissions = (float) TransactionItem::whereHas('transaction', function ($q) use ($today) {
+            $q->whereDate('created_at', $today)->where('payment_status', 'paid')->where('status', '!=', 'cancelled');
+        })->sum('staff_commission_amount');
+        $todayNetShopProfit = max(0, $totalSalesToday - $todayCommissions - $todayPaymongoFees);
+
+        // All-Time Payout / Cashout Metrics (for Admin Cashout Button)
+        $allTimePaidTransactions = Transaction::where('payment_status', 'paid')->where('status', '!=', 'cancelled')->get();
+        $allTimeGross = (float) $allTimePaidTransactions->sum('total_amount');
+        $allTimeQR = (float) $allTimePaidTransactions->whereIn('payment_method', ['paymongo_qr', 'paymongo_link'])->sum('total_amount');
+        $allTimePaymongoFees = round($allTimeQR * 0.025, 2);
+        $allTimeCommissions = (float) TransactionItem::whereHas('transaction', fn($q) => $q->where('payment_status', 'paid')->where('status', '!=', 'cancelled'))->sum('staff_commission_amount');
+        $allTimeNetShopProfit = max(0, $allTimeGross - $allTimeCommissions - $allTimePaymongoFees);
+        
+        $totalCashedOut = (float) \App\Models\Payout::where('type', 'admin_shop')->where('status', 'completed')->sum('gross_amount');
+        $availableForCashout = max(0, $allTimeNetShopProfit - $totalCashedOut);
+        $recentPayouts = \App\Models\Payout::where('type', 'admin_shop')->latest()->take(5)->get();
+
         // 3. Remittance & Staff Tally (Shop Share vs Staff Commissions)
         $staffProfiles = StaffProfile::where('is_active', true)
             ->with(['transactionItems' => function ($q) use ($today) {
@@ -132,6 +151,16 @@ class DashboardController extends Controller
             'totalSalesToday',
             'cashSalesToday',
             'qrSalesToday',
+            'todayPaymongoFees',
+            'todayCommissions',
+            'todayNetShopProfit',
+            'allTimeGross',
+            'allTimePaymongoFees',
+            'allTimeCommissions',
+            'allTimeNetShopProfit',
+            'totalCashedOut',
+            'availableForCashout',
+            'recentPayouts',
             'staffProfiles',
             'queueAvailable',
             'servingInShop',
