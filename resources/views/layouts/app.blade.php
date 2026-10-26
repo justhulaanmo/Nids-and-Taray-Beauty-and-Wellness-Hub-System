@@ -110,7 +110,7 @@
             <div class="p-3 lg:p-4">
                 <a href="{{ route('transactions.create') }}" class="w-full py-2.5 px-3.5 rounded-xl bg-gradient-to-r from-emerald-700 to-teal-700 hover:from-emerald-800 hover:to-teal-800 text-white font-bold text-xs shadow-md shadow-emerald-800/15 flex items-center justify-center space-x-2 transition-all active:scale-[0.98]">
                     <i data-lucide="plus-circle" class="w-4 h-4"></i>
-                    <span>+ New Order</span>
+                    <span>New Booking</span>
                 </a>
             </div>
 
