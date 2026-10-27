@@ -196,7 +196,7 @@
         <div class="bg-gradient-to-br from-stone-900 via-emerald-950 to-stone-900 text-white rounded-3xl p-5 sm:p-6 shadow-md border border-emerald-800/60 space-y-5">
             <!-- Header with Month Selector & Action Buttons -->
             <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 border-b border-white/10 pb-4">
-                <div>
+                <div class="min-w-0 flex-1">
                     <div class="flex items-center space-x-2">
                         <span class="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center shrink-0">
                             <i data-lucide="calculator" class="w-4 h-4 text-emerald-300"></i>
@@ -205,12 +205,12 @@
                             <span>Monthly Net Profit & Expense Tracker</span>
                         </h2>
                     </div>
-                    <p class="text-[11px] text-stone-300 mt-1">
+                    <p class="text-[11px] text-stone-300 mt-1 lg:whitespace-nowrap overflow-hidden text-ellipsis">
                         Gross Sales &minus; Deductions (Commissions & Gateway Fees) = <strong class="text-emerald-300">Gross Profit</strong> &minus; Operating Expenses (Overhead & Daily Operations) = <strong class="text-emerald-200">True Net Profit (Tubo)</strong>.
                     </p>
                 </div>
 
-                <div class="flex flex-wrap items-center gap-2 self-start lg:self-auto">
+                <div class="flex items-center gap-2 self-start lg:self-auto shrink-0">
                     <!-- Month Selector -->
                     <form method="GET" action="{{ route('dashboard') }}" class="flex items-center space-x-1.5 bg-white/10 p-1.5 rounded-2xl border border-white/15">
                         <span class="text-[11px] font-bold text-emerald-200 pl-1.5">Month:</span>
@@ -223,13 +223,6 @@
                         class="px-3.5 py-2 rounded-2xl bg-white/15 hover:bg-white/20 text-white border border-white/20 font-black text-xs shadow-xs transition active:scale-95 flex items-center space-x-1.5 cursor-pointer">
                         <i data-lucide="plus-circle" class="w-4 h-4 text-emerald-300"></i>
                         <span>+ Add Expense</span>
-                    </button>
-
-                    <!-- Cashout Button (Outside Tiles / In Header) -->
-                    <button type="button" onclick="openAdminCashoutModal()"
-                        class="px-3.5 py-2 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-stone-950 font-black text-xs shadow-xs transition active:scale-95 flex items-center space-x-1.5 cursor-pointer">
-                        <i data-lucide="arrow-up-right" class="w-4 h-4 text-stone-950"></i>
-                        <span>Cashout (₱{{ number_format($availableForCashout, 0) }})</span>
                     </button>
                 </div>
             </div>
@@ -288,33 +281,37 @@
                 </div>
 
                 <!-- 5. TRUE NET PROFIT (HERO CARD) -->
-                <div class="col-span-2 lg:col-span-1 p-3.5 rounded-2xl border {{ $monthTrueNetProfit >= 0 ? 'bg-emerald-600/30 border-emerald-400/50 text-emerald-100' : 'bg-rose-600/30 border-rose-400/50 text-rose-100' }}">
-                    <div class="flex items-center justify-between">
-                        <span class="text-[10px] font-black uppercase tracking-wider block">5. True Net Profit</span>
-                        <span class="text-[9px] font-bold px-1.5 py-0.2 rounded uppercase {{ $monthTrueNetProfit >= 0 ? 'bg-emerald-400/30 text-emerald-200' : 'bg-rose-400/30 text-rose-200' }}">
-                            {{ $monthTrueNetProfit >= 0 ? 'May Tubo' : 'Deficit' }}
+                <div class="col-span-2 lg:col-span-1 p-3.5 rounded-2xl border flex flex-col justify-between {{ $monthTrueNetProfit >= 0 ? 'bg-emerald-600/30 border-emerald-400/50 text-emerald-100' : 'bg-rose-600/30 border-rose-400/50 text-rose-100' }}">
+                    <div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-black uppercase tracking-wider block">5. True Net Profit</span>
+                            <span class="text-[9px] font-bold px-1.5 py-0.2 rounded uppercase {{ $monthTrueNetProfit >= 0 ? 'bg-emerald-400/30 text-emerald-200' : 'bg-rose-400/30 text-rose-200' }}">
+                                {{ $monthTrueNetProfit >= 0 ? 'May Tubo' : 'Deficit' }}
+                            </span>
+                        </div>
+                        <span class="text-2xl font-black block mt-0.5 {{ $monthTrueNetProfit >= 0 ? 'text-white' : 'text-rose-200' }}">
+                            {{ $monthTrueNetProfit < 0 ? '-' : '' }}₱{{ number_format(abs($monthTrueNetProfit), 2) }}
+                        </span>
+                        <span class="text-[10px] block mt-0.5 {{ $monthTrueNetProfit >= 0 ? 'text-emerald-200/90' : 'text-rose-200/90' }}">
+                            {{ $monthTrueNetProfit >= 0 ? 'Malinis na kita ng shop' : 'Kulang sa bayad ng gastusin' }}
                         </span>
                     </div>
-                    <span class="text-2xl font-black block mt-0.5 {{ $monthTrueNetProfit >= 0 ? 'text-white' : 'text-rose-200' }}">
-                        {{ $monthTrueNetProfit < 0 ? '-' : '' }}₱{{ number_format(abs($monthTrueNetProfit), 2) }}
-                    </span>
-                    <span class="text-[10px] block mt-0.5 {{ $monthTrueNetProfit >= 0 ? 'text-emerald-200/90' : 'text-rose-200/90' }}">
-                        {{ $monthTrueNetProfit >= 0 ? 'Malinis na kita ng shop' : 'Kulang sa bayad ng gastusin' }}
-                    </span>
+
+                    <!-- Cashout Button at the bottom of Tile 5 -->
+                    <button type="button" onclick="openAdminCashoutModal()"
+                        class="w-full mt-3 py-1.5 px-2 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-stone-950 font-black text-xs shadow-xs transition active:scale-95 flex items-center justify-center space-x-1.5 cursor-pointer">
+                        <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-stone-950 shrink-0"></i>
+                        <span>Cashout (₱{{ number_format($availableForCashout, 0) }})</span>
+                    </button>
                 </div>
             </div>
 
             <!-- Recent Cashout & Available for Withdrawal Status Bar -->
             <div class="pt-2 border-t border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs">
-                <div class="flex items-center flex-wrap gap-2">
+                <div class="flex items-center space-x-2">
                     <span class="text-stone-300 font-medium">Available for Bank/E-Wallet Cashout:</span>
                     <span class="font-black text-emerald-300 text-sm">₱{{ number_format($availableForCashout, 2) }}</span>
                     <span class="text-stone-400 text-[10px]">(All-time net profit minus withdrawn: ₱{{ number_format($totalCashedOut, 2) }})</span>
-                    <button type="button" onclick="openAdminCashoutModal()"
-                        class="px-2.5 py-1 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-stone-950 font-black text-[11px] shadow-xs transition active:scale-95 flex items-center space-x-1 cursor-pointer">
-                        <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-stone-950"></i>
-                        <span>Cashout Now</span>
-                    </button>
                 </div>
 
                 @if(isset($recentPayouts) && $recentPayouts->isNotEmpty())

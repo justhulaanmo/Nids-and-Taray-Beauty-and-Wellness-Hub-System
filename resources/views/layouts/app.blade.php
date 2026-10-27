@@ -166,12 +166,12 @@
             <!-- Grouped Sidebar Navigation Menu -->
             <nav class="flex-1 px-3 space-y-4 text-xs font-medium pb-4">
                 
-                <!-- Group 1: Core Essentials -->
+                <!-- Category 1: Salon Operations (Core Daily Work) -->
                 <div class="space-y-1">
                     <div class="px-2 pb-1 text-[10px] font-extrabold uppercase tracking-wider text-stone-400">
-                        Overview
+                        Salon Operations
                     </div>
-                    <a href="{{ route('dashboard') }}" class="flex items-center space-x-2.5 px-3 py-2 rounded-xl transition font-semibold {{ request()->routeIs('dashboard') ? 'bg-emerald-50 text-emerald-900 border border-emerald-200/80 font-bold' : 'text-stone-600 hover:text-emerald-900 hover:bg-stone-50' }}">
+                    <a href="{{ route('dashboard') }}" class="flex items-center space-x-2.5 px-3 py-2 rounded-xl transition font-semibold {{ request()->routeIs('dashboard') && Auth::user()->role !== 'admin' ? 'bg-emerald-50 text-emerald-900 border border-emerald-200/80 font-bold' : (request()->routeIs('dashboard') ? 'bg-emerald-50 text-emerald-900 border border-emerald-200/80 font-bold' : 'text-stone-600 hover:text-emerald-900 hover:bg-stone-50') }}">
                         <i data-lucide="layout-dashboard" class="w-4 h-4 {{ request()->routeIs('dashboard') ? 'text-emerald-700' : 'text-stone-400' }}"></i>
                         <span>Dashboard</span>
                     </a>
@@ -182,52 +182,48 @@
                         </span>
                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                     </a>
-                </div>
-
-                <!-- Group 2: Consolidated Services Section -->
-                <div class="space-y-1">
-                    <div class="px-2 pb-1 text-[10px] font-extrabold uppercase tracking-wider text-stone-400">
-                        Services
-                    </div>
-                    <a href="{{ route('menu.index') }}" class="flex items-center space-x-2.5 px-3 py-2 rounded-xl transition font-semibold {{ request()->routeIs('menu.*') ? 'bg-emerald-50 text-emerald-900 border border-emerald-200/80 font-bold' : 'text-stone-600 hover:text-emerald-900 hover:bg-stone-50' }}">
-                        <i data-lucide="book-open" class="w-4 h-4 {{ request()->routeIs('menu.*') ? 'text-emerald-700' : 'text-stone-400' }}"></i>
-                        <span>Service Menu</span>
-                    </a>
-                    @if(Auth::user()->role === 'admin')
-                        <a href="{{ route('services.manage') }}" class="flex items-center space-x-2.5 px-3 py-2 rounded-xl transition font-semibold {{ request()->routeIs('services.manage') ? 'bg-amber-50 text-amber-900 border border-amber-200 font-bold' : 'text-amber-800 hover:text-amber-950 hover:bg-amber-50/60' }}">
-                            <i data-lucide="sliders" class="w-4 h-4 {{ request()->routeIs('services.manage') ? 'text-amber-600' : 'text-amber-500' }}"></i>
-                            <span>Price Setter</span>
-                            <span class="ml-auto text-[9px] px-1.5 py-0.5 rounded-md font-bold bg-amber-100 text-amber-800">Admin</span>
-                        </a>
-                    @endif
-                </div>
-
-                <!-- Group 3: Operations & Finances -->
-                <div class="space-y-1">
-                    <div class="px-2 pb-1 text-[10px] font-extrabold uppercase tracking-wider text-stone-400">
-                        Operations & Sales
-                    </div>
                     <a href="{{ route('transactions.index') }}" class="flex items-center space-x-2.5 px-3 py-2 rounded-xl transition font-semibold {{ request()->routeIs('transactions.index', 'transactions.show') ? 'bg-emerald-50 text-emerald-900 border border-emerald-200/80 font-bold' : 'text-stone-600 hover:text-emerald-900 hover:bg-stone-50' }}">
                         <i data-lucide="receipt" class="w-4 h-4 {{ request()->routeIs('transactions.index', 'transactions.show') ? 'text-emerald-700' : 'text-stone-400' }}"></i>
                         <span>Transactions</span>
                     </a>
-                    @if(Auth::user()->role === 'admin')
-                        <a href="{{ route('staff-tracker.index') }}" class="flex items-center space-x-2.5 px-3 py-2 rounded-xl transition font-semibold {{ request()->routeIs('staff-tracker.*') ? 'bg-emerald-50 text-emerald-900 border border-emerald-200/80 font-bold' : 'text-stone-600 hover:text-emerald-900 hover:bg-stone-50' }}">
-                            <i data-lucide="user-check" class="w-4 h-4 {{ request()->routeIs('staff-tracker.*') ? 'text-emerald-700' : 'text-stone-400' }}"></i>
-                            <span>Staff Tracker</span>
-                            <span class="ml-auto text-[9px] px-1.5 py-0.5 rounded-md font-bold bg-amber-100 text-amber-800">Admin</span>
-                        </a>
-                        <a href="{{ route('dashboard') }}" class="flex items-center space-x-2.5 px-3 py-2 rounded-xl transition font-semibold {{ request()->routeIs('dashboard') ? 'bg-emerald-50 text-emerald-900 border border-emerald-200/80 font-bold' : 'text-stone-600 hover:text-emerald-900 hover:bg-stone-50' }}">
-                            <i data-lucide="calculator" class="w-4 h-4 {{ request()->routeIs('dashboard') ? 'text-emerald-700' : 'text-stone-400' }}"></i>
-                            <span>Financials & Net Profit</span>
-                            <span class="ml-auto text-[9px] px-1.5 py-0.5 rounded-md font-bold bg-amber-100 text-amber-800">Admin</span>
-                        </a>
-                    @endif
+                    <a href="{{ route('menu.index') }}" class="flex items-center space-x-2.5 px-3 py-2 rounded-xl transition font-semibold {{ request()->routeIs('menu.*') ? 'bg-emerald-50 text-emerald-900 border border-emerald-200/80 font-bold' : 'text-stone-600 hover:text-emerald-900 hover:bg-stone-50' }}">
+                        <i data-lucide="book-open" class="w-4 h-4 {{ request()->routeIs('menu.*') ? 'text-emerald-700' : 'text-stone-400' }}"></i>
+                        <span>Service Menu</span>
+                    </a>
+                </div>
+
+                <!-- Category 2: Employee / Staff Pages -->
+                <div class="space-y-1">
+                    <div class="px-2 pb-1 text-[10px] font-extrabold uppercase tracking-wider text-stone-400">
+                        Employee & Staff
+                    </div>
                     <a href="{{ route('wallet.index') }}" class="flex items-center space-x-2.5 px-3 py-2 rounded-xl transition font-semibold {{ request()->routeIs('wallet.*') ? 'bg-emerald-50 text-emerald-900 border border-emerald-200/80 font-bold' : 'text-stone-600 hover:text-emerald-900 hover:bg-stone-50' }}">
                         <i data-lucide="wallet" class="w-4 h-4 {{ request()->routeIs('wallet.*') ? 'text-emerald-700' : 'text-stone-400' }}"></i>
                         <span>My Wallet</span>
                     </a>
                 </div>
+
+                <!-- Category 3: Admin Management Pages (Grouped Together) -->
+                @if(Auth::user()->role === 'admin')
+                    <div class="space-y-1 pt-1 border-t border-stone-100">
+                        <div class="px-2 pb-1 text-[10px] font-extrabold uppercase tracking-wider text-amber-800 flex items-center justify-between">
+                            <span>Admin Management</span>
+                            <span class="text-[9px] px-1.5 py-0.2 rounded-md font-bold bg-amber-100 text-amber-800">Admin</span>
+                        </div>
+                        <a href="{{ route('dashboard') }}" class="flex items-center space-x-2.5 px-3 py-2 rounded-xl transition font-semibold {{ request()->routeIs('dashboard') ? 'bg-emerald-50 text-emerald-900 border border-emerald-200/80 font-bold' : 'text-stone-600 hover:text-emerald-900 hover:bg-stone-50' }}">
+                            <i data-lucide="calculator" class="w-4 h-4 {{ request()->routeIs('dashboard') ? 'text-emerald-700' : 'text-stone-400' }}"></i>
+                            <span>Financials & Net Profit</span>
+                        </a>
+                        <a href="{{ route('staff-tracker.index') }}" class="flex items-center space-x-2.5 px-3 py-2 rounded-xl transition font-semibold {{ request()->routeIs('staff-tracker.*') ? 'bg-emerald-50 text-emerald-900 border border-emerald-200/80 font-bold' : 'text-stone-600 hover:text-emerald-900 hover:bg-stone-50' }}">
+                            <i data-lucide="user-check" class="w-4 h-4 {{ request()->routeIs('staff-tracker.*') ? 'text-emerald-700' : 'text-stone-400' }}"></i>
+                            <span>Staff Tracker</span>
+                        </a>
+                        <a href="{{ route('services.manage') }}" class="flex items-center space-x-2.5 px-3 py-2 rounded-xl transition font-semibold {{ request()->routeIs('services.manage') ? 'bg-emerald-50 text-emerald-900 border border-emerald-200/80 font-bold' : 'text-stone-600 hover:text-emerald-900 hover:bg-stone-50' }}">
+                            <i data-lucide="sliders" class="w-4 h-4 {{ request()->routeIs('services.manage') ? 'text-emerald-700' : 'text-stone-400' }}"></i>
+                            <span>Price Setter</span>
+                        </a>
+                    </div>
+                @endif
 
             </nav>
         </div>

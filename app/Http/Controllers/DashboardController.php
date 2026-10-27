@@ -54,7 +54,8 @@ class DashboardController extends Controller
         $allTimeQR = (float) $allTimePaidTransactions->whereIn('payment_method', ['paymongo_qr', 'paymongo_link'])->sum('total_amount');
         $allTimePaymongoFees = round($allTimeQR * 0.025, 2);
         $allTimeCommissions = (float) TransactionItem::whereHas('transaction', fn($q) => $q->where('payment_status', 'paid')->where('status', '!=', 'cancelled'))->sum('staff_commission_amount');
-        $allTimeNetShopProfit = max(0, $allTimeGross - $allTimeCommissions - $allTimePaymongoFees);
+        $allTimeExpenses = (float) Expense::sum('amount');
+        $allTimeNetShopProfit = max(0, $allTimeGross - $allTimeCommissions - $allTimePaymongoFees - $allTimeExpenses);
         
         $totalCashedOut = (float) Payout::where('type', 'admin_shop')->where('status', 'completed')->sum('gross_amount');
         $availableForCashout = max(0, $allTimeNetShopProfit - $totalCashedOut);
