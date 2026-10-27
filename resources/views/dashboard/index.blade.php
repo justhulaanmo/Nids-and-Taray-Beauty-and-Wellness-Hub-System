@@ -224,6 +224,13 @@
                         <i data-lucide="plus-circle" class="w-4 h-4 text-emerald-300"></i>
                         <span>+ Add Expense</span>
                     </button>
+
+                    <!-- Cashout Button (Outside Tiles / In Header) -->
+                    <button type="button" onclick="openAdminCashoutModal()"
+                        class="px-3.5 py-2 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-stone-950 font-black text-xs shadow-xs transition active:scale-95 flex items-center space-x-1.5 cursor-pointer">
+                        <i data-lucide="arrow-up-right" class="w-4 h-4 text-stone-950"></i>
+                        <span>Cashout (₱{{ number_format($availableForCashout, 0) }})</span>
+                    </button>
                 </div>
             </div>
 
@@ -239,12 +246,27 @@
                 </div>
 
                 <!-- 2. Total Deductions -->
-                <div class="p-3.5 bg-white/5 rounded-2xl border border-white/10">
-                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-amber-300 block">2. Total Deductions</span>
-                    <span class="text-xl sm:text-2xl font-black text-amber-200 block mt-0.5">
-                        -₱{{ number_format($monthTotalDeductions, 2) }}
-                    </span>
-                    <span class="text-[10px] text-stone-400 block mt-0.5">Comm: ₱{{ number_format($monthCommissions, 0) }} &bull; Fee: ₱{{ number_format($monthPaymongoFees, 0) }}</span>
+                <div class="p-3.5 bg-white/5 rounded-2xl border border-white/10 flex flex-col justify-between">
+                    <div>
+                        <span class="text-[10px] font-extrabold uppercase tracking-wider text-amber-300 block">2. Total Deductions</span>
+                        <span class="text-xl sm:text-2xl font-black text-amber-200 block mt-0.5">
+                            -₱{{ number_format($monthTotalDeductions, 2) }}
+                        </span>
+                    </div>
+                    <div class="mt-2 pt-1.5 border-t border-white/10 space-y-0.5 text-[10px]">
+                        <div class="flex items-center justify-between text-stone-300">
+                            <span>Staff Commission:</span>
+                            <span class="font-bold text-white">₱{{ number_format($monthCommissions, 2) }}</span>
+                        </div>
+                        <div class="flex items-center justify-between text-stone-300">
+                            <span>PayMongo Fee (2.5%):</span>
+                            <span class="font-bold text-amber-300">₱{{ number_format($monthPaymongoFees, 2) }}</span>
+                        </div>
+                        <div class="flex items-center justify-between pt-0.5 border-t border-white/10 font-extrabold text-amber-200">
+                            <span>Total Deductions:</span>
+                            <span>-₱{{ number_format($monthTotalDeductions, 2) }}</span>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- 3. Gross Profit -->
@@ -266,37 +288,33 @@
                 </div>
 
                 <!-- 5. TRUE NET PROFIT (HERO CARD) -->
-                <div class="col-span-2 lg:col-span-1 p-3.5 rounded-2xl border flex flex-col justify-between {{ $monthTrueNetProfit >= 0 ? 'bg-emerald-600/30 border-emerald-400/50 text-emerald-100' : 'bg-rose-600/30 border-rose-400/50 text-rose-100' }}">
-                    <div>
-                        <div class="flex items-center justify-between">
-                            <span class="text-[10px] font-black uppercase tracking-wider block">5. True Net Profit</span>
-                            <span class="text-[9px] font-bold px-1.5 py-0.2 rounded uppercase {{ $monthTrueNetProfit >= 0 ? 'bg-emerald-400/30 text-emerald-200' : 'bg-rose-400/30 text-rose-200' }}">
-                                {{ $monthTrueNetProfit >= 0 ? 'May Tubo' : 'Deficit' }}
-                            </span>
-                        </div>
-                        <span class="text-2xl font-black block mt-0.5 {{ $monthTrueNetProfit >= 0 ? 'text-white' : 'text-rose-200' }}">
-                            {{ $monthTrueNetProfit < 0 ? '-' : '' }}₱{{ number_format(abs($monthTrueNetProfit), 2) }}
-                        </span>
-                        <span class="text-[10px] block mt-0.5 {{ $monthTrueNetProfit >= 0 ? 'text-emerald-200/90' : 'text-rose-200/90' }}">
-                            {{ $monthTrueNetProfit >= 0 ? 'Malinis na kita ng shop' : 'Kulang sa bayad ng gastusin' }}
+                <div class="col-span-2 lg:col-span-1 p-3.5 rounded-2xl border {{ $monthTrueNetProfit >= 0 ? 'bg-emerald-600/30 border-emerald-400/50 text-emerald-100' : 'bg-rose-600/30 border-rose-400/50 text-rose-100' }}">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-black uppercase tracking-wider block">5. True Net Profit</span>
+                        <span class="text-[9px] font-bold px-1.5 py-0.2 rounded uppercase {{ $monthTrueNetProfit >= 0 ? 'bg-emerald-400/30 text-emerald-200' : 'bg-rose-400/30 text-rose-200' }}">
+                            {{ $monthTrueNetProfit >= 0 ? 'May Tubo' : 'Deficit' }}
                         </span>
                     </div>
-
-                    <!-- Cashout Button -->
-                    <button type="button" onclick="openAdminCashoutModal()"
-                        class="w-full mt-3 py-1.5 px-2 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-stone-950 font-black text-xs shadow-xs transition active:scale-95 flex items-center justify-center space-x-1.5 cursor-pointer">
-                        <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-stone-950 shrink-0"></i>
-                        <span>Cashout (₱{{ number_format($availableForCashout, 0) }})</span>
-                    </button>
+                    <span class="text-2xl font-black block mt-0.5 {{ $monthTrueNetProfit >= 0 ? 'text-white' : 'text-rose-200' }}">
+                        {{ $monthTrueNetProfit < 0 ? '-' : '' }}₱{{ number_format(abs($monthTrueNetProfit), 2) }}
+                    </span>
+                    <span class="text-[10px] block mt-0.5 {{ $monthTrueNetProfit >= 0 ? 'text-emerald-200/90' : 'text-rose-200/90' }}">
+                        {{ $monthTrueNetProfit >= 0 ? 'Malinis na kita ng shop' : 'Kulang sa bayad ng gastusin' }}
+                    </span>
                 </div>
             </div>
 
             <!-- Recent Cashout & Available for Withdrawal Status Bar -->
             <div class="pt-2 border-t border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs">
-                <div class="flex items-center space-x-2">
+                <div class="flex items-center flex-wrap gap-2">
                     <span class="text-stone-300 font-medium">Available for Bank/E-Wallet Cashout:</span>
                     <span class="font-black text-emerald-300 text-sm">₱{{ number_format($availableForCashout, 2) }}</span>
                     <span class="text-stone-400 text-[10px]">(All-time net profit minus withdrawn: ₱{{ number_format($totalCashedOut, 2) }})</span>
+                    <button type="button" onclick="openAdminCashoutModal()"
+                        class="px-2.5 py-1 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-stone-950 font-black text-[11px] shadow-xs transition active:scale-95 flex items-center space-x-1 cursor-pointer">
+                        <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 text-stone-950"></i>
+                        <span>Cashout Now</span>
+                    </button>
                 </div>
 
                 @if(isset($recentPayouts) && $recentPayouts->isNotEmpty())
