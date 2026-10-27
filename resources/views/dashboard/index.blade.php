@@ -206,7 +206,7 @@
                         </h2>
                     </div>
                     <p class="text-[11px] text-stone-300 mt-1">
-                        Gross Sales &minus; Deductions (Commissions & Gateway Fees) = <strong class="text-emerald-300">Gross Profit</strong> &minus; Shop Expenses (Rent, Bills, Supplies) = <strong class="text-emerald-200">True Net Profit (Tubo)</strong>.
+                        Gross Sales &minus; Deductions (Commissions & Gateway Fees) = <strong class="text-emerald-300">Gross Profit</strong> &minus; Operating Expenses (Overhead & Daily Operations) = <strong class="text-emerald-200">True Net Profit (Tubo)</strong>.
                     </p>
                 </div>
 
@@ -280,11 +280,11 @@
 
                 <!-- 4. Shop Expenses (Rent & Bills) -->
                 <div class="p-3.5 bg-white/5 rounded-2xl border border-white/10">
-                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-rose-300 block">4. Shop Expenses</span>
+                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-rose-300 block">4. Operating Expenses</span>
                     <span class="text-xl sm:text-2xl font-black text-rose-200 block mt-0.5">
                         -₱{{ number_format($monthTotalExpenses, 2) }}
                     </span>
-                    <span class="text-[10px] text-stone-400 block mt-0.5">Rent, Bills, Supplies</span>
+                    <span class="text-[10px] text-stone-400 block mt-0.5">Overhead & Daily Operations</span>
                 </div>
 
                 <!-- 5. TRUE NET PROFIT (HERO CARD) -->
@@ -339,7 +339,7 @@
                 <div class="flex items-center space-x-2">
                     <i data-lucide="receipt" class="w-4 h-4 text-emerald-800"></i>
                     <h3 class="text-xs font-black uppercase tracking-wider text-stone-900">
-                        Monthly Shop Expenses Log ({{ \Carbon\Carbon::parse($selectedMonth . '-01')->format('F Y') }})
+                        Monthly Operating Expenses Log ({{ \Carbon\Carbon::parse($selectedMonth . '-01')->format('F Y') }})
                     </h3>
                 </div>
                 <div class="flex items-center space-x-2">
