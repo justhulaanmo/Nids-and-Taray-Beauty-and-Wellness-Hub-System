@@ -62,7 +62,7 @@
                 </div>
             @endif
 
-            <form action="{{ route('login.post') }}" method="POST" class="space-y-4">
+            <form action="{{ route('login.post') }}" method="POST" class="space-y-4" onsubmit="sessionStorage.removeItem('nids_splash_shown')">
                 @csrf
                 <div>
                     <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-1.5">Email Address</label>

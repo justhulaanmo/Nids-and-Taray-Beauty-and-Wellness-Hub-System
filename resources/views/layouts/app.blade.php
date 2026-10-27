@@ -63,8 +63,17 @@
 </head>
 <body class="min-h-full flex flex-col md:flex-row bg-[#f6f9f6] text-stone-800 antialiased selection:bg-emerald-100 selection:text-emerald-900 relative">
 
-    <!-- App Splash Screen / Logo Flashing Intro -->
-    <div id="app-splash-screen" class="fixed inset-0 z-[9999] bg-emerald-950 flex flex-col items-center justify-center transition-opacity duration-500 ease-out pointer-events-none opacity-100">
+    <script>
+        // Prevent splash flashing on regular sidebar navigation / button clicks
+        // Shows ONLY on initial app launch or login
+        var shouldShowSplash = !sessionStorage.getItem('nids_splash_shown');
+        if (!shouldShowSplash) {
+            document.write('<style>#app-splash-screen { display: none !important; }</style>');
+        }
+    </script>
+
+    <!-- App Splash Screen / Logo Flashing Intro (First visit / Login only) -->
+    <div id="app-splash-screen" class="fixed inset-0 z-[9999] bg-emerald-950 flex flex-col items-center justify-center transition-opacity duration-300 ease-out pointer-events-none opacity-100">
         <div class="flex flex-col items-center animate-pulse">
             <img src="{{ asset('images/logo.jpg') }}" alt="Nids & Taray" class="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl object-cover shadow-2xl ring-4 ring-emerald-400/40 mb-3 border-2 border-white/20">
             <h1 class="text-white font-black text-xl sm:text-2xl tracking-tight">Nids & Taray</h1>
@@ -72,16 +81,21 @@
         </div>
     </div>
     <script>
-        // Smooth dismissal of logo flash splash screen
-        window.addEventListener('DOMContentLoaded', function() {
-            setTimeout(function() {
-                const splash = document.getElementById('app-splash-screen');
-                if (splash) {
-                    splash.classList.add('opacity-0');
-                    setTimeout(() => splash.remove(), 500);
-                }
-            }, 450);
-        });
+        if (shouldShowSplash) {
+            sessionStorage.setItem('nids_splash_shown', 'true');
+            window.addEventListener('DOMContentLoaded', function() {
+                setTimeout(function() {
+                    var splash = document.getElementById('app-splash-screen');
+                    if (splash) {
+                        splash.classList.add('opacity-0');
+                        setTimeout(function() { splash.remove(); }, 350);
+                    }
+                }, 350);
+            });
+        } else {
+            var splash = document.getElementById('app-splash-screen');
+            if (splash) splash.remove();
+        }
     </script>
 
     <!-- Subtle Luxury Spa Background Wallpaper Layer (Adaptive to Admin vs Employee) -->
@@ -243,7 +257,7 @@
                     <a href="{{ route('profile.show') }}" class="p-1.5 rounded-lg text-stone-400 hover:text-emerald-800 hover:bg-emerald-50 transition" title="Account Settings" aria-label="Account Settings">
                         <i data-lucide="settings" class="w-4 h-4"></i>
                     </a>
-                    <form action="{{ route('logout') }}" method="POST" class="inline">
+                    <form action="{{ route('logout') }}" method="POST" class="inline" onsubmit="sessionStorage.removeItem('nids_splash_shown')">
                         @csrf
                         <button type="submit" class="p-1.5 rounded-lg text-stone-400 hover:text-rose-600 hover:bg-rose-50 transition" title="Log out" aria-label="Log out">
                             <i data-lucide="log-out" class="w-4 h-4"></i>
