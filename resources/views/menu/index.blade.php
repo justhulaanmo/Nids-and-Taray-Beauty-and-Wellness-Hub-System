@@ -44,26 +44,26 @@
     <!-- Category Filter Tabs -->
     <div class="flex flex-wrap items-center gap-2">
         <button type="button" onclick="filterMenu('all')" id="menu-tab-all"
-            class="menu-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-black transition shadow-2xs flex items-center space-x-1.5 {{ $defaultFilter === 'all' ? 'bg-stone-900 text-white' : 'bg-white text-stone-700 border border-stone-200 hover:bg-stone-50' }}">
+            class="menu-filter-btn cursor-pointer px-3.5 py-1.5 rounded-xl text-xs font-black transition shadow-2xs flex items-center space-x-1.5 {{ $defaultFilter === 'all' ? 'bg-stone-900 text-white' : 'bg-white text-stone-700 border border-stone-200 hover:bg-stone-50' }}">
             <span>All Services</span>
         </button>
 
         <button type="button" onclick="filterMenu('nails-and-toes')" id="menu-tab-nails-and-toes"
-            class="menu-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-black transition shadow-2xs flex items-center space-x-1.5 {{ $defaultFilter === 'nails-and-toes' ? 'bg-rose-700 text-white' : 'bg-white text-rose-800 border border-rose-200 hover:bg-rose-50' }}">
+            class="menu-filter-btn cursor-pointer px-3.5 py-1.5 rounded-xl text-xs font-black transition shadow-2xs flex items-center space-x-1.5 {{ $defaultFilter === 'nails-and-toes' ? 'bg-rose-700 text-white' : 'bg-white text-rose-800 border border-rose-200 hover:bg-rose-50' }}">
             <span class="w-2 h-2 rounded-full bg-rose-400"></span>
             <span>Nails & Cutics</span>
             <span class="text-[10px] font-normal opacity-80">(Manicurist)</span>
         </button>
 
         <button type="button" onclick="filterMenu('massage-and-wellness')" id="menu-tab-massage-and-wellness"
-            class="menu-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-black transition shadow-2xs flex items-center space-x-1.5 {{ $defaultFilter === 'massage-and-wellness' ? 'bg-sky-700 text-white' : 'bg-white text-sky-800 border border-sky-200 hover:bg-sky-50' }}">
+            class="menu-filter-btn cursor-pointer px-3.5 py-1.5 rounded-xl text-xs font-black transition shadow-2xs flex items-center space-x-1.5 {{ $defaultFilter === 'massage-and-wellness' ? 'bg-sky-700 text-white' : 'bg-white text-sky-800 border border-sky-200 hover:bg-sky-50' }}">
             <span class="w-2 h-2 rounded-full bg-sky-400"></span>
             <span>Massage & Wellness</span>
             <span class="text-[10px] font-normal opacity-80">(Massage Therapist)</span>
         </button>
 
         <button type="button" onclick="filterMenu('combo-packages')" id="menu-tab-combo-packages"
-            class="menu-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-black transition shadow-2xs flex items-center space-x-1.5 {{ $defaultFilter === 'combo-packages' ? 'bg-emerald-700 text-white' : 'bg-white text-emerald-800 border border-emerald-200 hover:bg-emerald-50' }}">
+            class="menu-filter-btn cursor-pointer px-3.5 py-1.5 rounded-xl text-xs font-black transition shadow-2xs flex items-center space-x-1.5 {{ $defaultFilter === 'combo-packages' ? 'bg-emerald-700 text-white' : 'bg-white text-emerald-800 border border-emerald-200 hover:bg-emerald-50' }}">
             <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
             <span>Combo Packages</span>
             <span class="text-[10px] font-normal opacity-80">(All-Around)</span>
@@ -121,5 +121,60 @@
         @endforeach
     </div>
 
+    <script>
+        function filterMenu(slug) {
+            // 1. Show / hide category sections
+            const sections = document.querySelectorAll('.category-section');
+            sections.forEach(function(sec) {
+                if (slug === 'all' || sec.getAttribute('data-category') === slug) {
+                    sec.style.display = 'block';
+                } else {
+                    sec.style.display = 'none';
+                }
+            });
+
+            // 2. Tab styling dictionary
+            const tabConfigs = {
+                'all': {
+                    active: ['bg-stone-900', 'text-white'],
+                    inactive: ['bg-white', 'text-stone-700', 'border', 'border-stone-200', 'hover:bg-stone-50']
+                },
+                'nails-and-toes': {
+                    active: ['bg-rose-700', 'text-white'],
+                    inactive: ['bg-white', 'text-rose-800', 'border', 'border-rose-200', 'hover:bg-rose-50']
+                },
+                'massage-and-wellness': {
+                    active: ['bg-sky-700', 'text-white'],
+                    inactive: ['bg-white', 'text-sky-800', 'border', 'border-sky-200', 'hover:bg-sky-50']
+                },
+                'combo-packages': {
+                    active: ['bg-emerald-700', 'text-white'],
+                    inactive: ['bg-white', 'text-emerald-800', 'border', 'border-emerald-200', 'hover:bg-emerald-50']
+                }
+            };
+
+            Object.keys(tabConfigs).forEach(function(key) {
+                const btn = document.getElementById('menu-tab-' + key);
+                if (!btn) return;
+                const config = tabConfigs[key];
+
+                if (key === slug) {
+                    config.inactive.forEach(c => btn.classList.remove(c));
+                    config.active.forEach(c => btn.classList.add(c));
+                } else {
+                    config.active.forEach(c => btn.classList.remove(c));
+                    config.inactive.forEach(c => btn.classList.add(c));
+                }
+            });
+        }
+
+        // Run filter on initial load if employee has a default category
+        document.addEventListener('DOMContentLoaded', function() {
+            const initialFilter = "{{ $defaultFilter }}";
+            if (initialFilter && initialFilter !== 'all') {
+                filterMenu(initialFilter);
+            }
+        });
+    </script>
 </div>
 @endsection
