@@ -26,16 +26,19 @@ class PayoutController extends Controller
             'amount' => 'required|numeric|min:100',
             'payout_method' => 'required|in:gcash,maya,bank',
             'account_name' => 'required|string|max:100',
-            'account_number' => 'required|string|max:50',
+            'account_number' => ['required', 'string', 'regex:/^09\d{9}$/'],
             'bank_name' => 'nullable|required_if:payout_method,bank|string|max:100',
+        ], [
+            'account_number.regex' => 'Ang Mobile / Account number ay dapat 11 digits at nagsisimula sa 09 (Halimbawa: 09171234567).',
         ]);
 
-        // Calculate available net profit
+        // Calculate available net profit (deduct commissions, gateway fees, and operating expenses)
         $totalGross = (float) Transaction::where('payment_status', 'paid')->where('status', '!=', 'cancelled')->sum('total_amount');
         $totalQR = (float) Transaction::where('payment_status', 'paid')->where('status', '!=', 'cancelled')->whereIn('payment_method', ['paymongo_qr', 'paymongo_link'])->sum('total_amount');
         $paymongoFees = round($totalQR * 0.025, 2);
         $totalCommissions = (float) TransactionItem::whereHas('transaction', fn($q) => $q->where('payment_status', 'paid')->where('status', '!=', 'cancelled'))->sum('staff_commission_amount');
-        $netShopProfit = $totalGross - $totalCommissions - $paymongoFees;
+        $totalExpenses = (float) \App\Models\Expense::sum('amount');
+        $netShopProfit = max(0, $totalGross - $totalCommissions - $paymongoFees - $totalExpenses);
         
         $alreadyCashedOut = (float) Payout::where('type', 'admin_shop')->where('status', 'completed')->sum('gross_amount');
         $availableForCashout = max(0, $netShopProfit - $alreadyCashedOut);
@@ -64,7 +67,7 @@ class PayoutController extends Controller
             'fee' => $transferFee,
             'net_amount' => $netTransfer,
             'payout_method' => $request->payout_method,
-            'account_name' => $request->account_name,
+            'account_name' => ucwords(strtolower(trim($request->account_name))),
             'account_number' => $request->account_number,
             'bank_name' => $request->bank_name,
             'status' => 'completed',
@@ -79,7 +82,7 @@ class PayoutController extends Controller
                 'reference_no' => $referenceNo,
                 'amount' => $netTransfer,
                 'payout_method' => strtoupper($request->payout_method) . ($request->bank_name ? " ({$request->bank_name})" : ''),
-                'account_name' => $request->account_name,
+                'account_name' => ucwords(strtolower(trim($request->account_name))),
                 'account_number' => $request->account_number,
                 'paymongo_payout_id' => $poutSimId,
                 'completed_at' => now()->format('M d, Y • h:i A'),
@@ -102,7 +105,9 @@ class PayoutController extends Controller
             'amount' => 'required|numeric|min:50',
             'payout_method' => 'required|in:gcash,maya,bank,cash_counter',
             'account_name' => 'required|string|max:100',
-            'account_number' => 'required|string|max:50',
+            'account_number' => ['required', 'string', 'regex:/^09\d{9}$/'],
+        ], [
+            'account_number.regex' => 'Ang Mobile / Account number ay dapat 11 digits at nagsisimula sa 09 (Halimbawa: 09171234567).',
         ]);
 
         // Total earned paid commissions using Net formula: (Gross - PayMongo Fee if QR) * Commission Rate
@@ -148,7 +153,7 @@ class PayoutController extends Controller
             'fee' => 0.00,
             'net_amount' => $requestedAmount,
             'payout_method' => $request->payout_method,
-            'account_name' => $request->account_name,
+            'account_name' => ucwords(strtolower(trim($request->account_name))),
             'account_number' => $request->account_number,
             'status' => 'completed',
             'paymongo_payout_id' => $poutSimId,
@@ -162,7 +167,7 @@ class PayoutController extends Controller
                 'reference_no' => $referenceNo,
                 'amount' => $requestedAmount,
                 'payout_method' => strtoupper($request->payout_method),
-                'account_name' => $request->account_name,
+                'account_name' => ucwords(strtolower(trim($request->account_name))),
                 'account_number' => $request->account_number,
                 'paymongo_payout_id' => $poutSimId,
                 'completed_at' => now()->format('M d, Y • h:i A'),

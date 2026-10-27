@@ -593,17 +593,29 @@
                         </select>
                     </div>
 
-                    <!-- Account Name & Number -->
+                    <!-- Account Name & Number with Trappings -->
                     <div class="space-y-3">
                         <div>
-                            <label class="block text-xs font-bold text-stone-700 mb-1">Account Holder Name *</label>
-                            <input type="text" name="account_name" required placeholder="e.g. Nida Santos"
-                                class="w-full px-3.5 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-xs font-bold text-stone-900">
+                            <div class="flex items-center justify-between mb-1">
+                                <label class="block text-xs font-bold text-stone-700">Account Holder Name *</label>
+                                <span class="text-[10px] text-emerald-700 font-semibold">Auto-Capitalized</span>
+                            </div>
+                            <input type="text" name="account_name" id="admin_account_name" required placeholder="e.g. Nida Santos"
+                                oninput="formatAccountName(this)"
+                                class="w-full px-3.5 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-xs font-bold text-stone-900 capitalize focus:bg-white focus:outline-hidden focus:ring-1 focus:ring-emerald-500"
+                                style="text-transform: capitalize;">
+                            <span class="text-[10px] text-stone-400 block mt-1 font-medium">Automatic title case (malaking titik ang simula ng bawat salita).</span>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-stone-700 mb-1">Mobile / Account Number *</label>
-                            <input type="text" name="account_number" required placeholder="e.g. 0917-xxx-xxxx"
-                                class="w-full px-3.5 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-xs font-bold text-stone-900">
+                            <div class="flex items-center justify-between mb-1">
+                                <label class="block text-xs font-bold text-stone-700">Mobile / Account Number (11 digits, simula sa 09) *</label>
+                                <span id="admin_phone_counter" class="text-[10px] font-bold text-stone-400">0/11</span>
+                            </div>
+                            <input type="tel" name="account_number" id="admin_account_number" required placeholder="09171234567"
+                                inputmode="numeric" maxlength="11" pattern="09[0-9]{9}" title="Dapat eksaktong 11 digits at magsimula sa 09 (Hal. 09171234567)"
+                                oninput="formatPhoneNumber(this, 'admin_phone_error', 'admin_phone_counter')"
+                                class="w-full px-3.5 py-2.5 rounded-xl bg-stone-50 border border-stone-200 text-xs font-bold text-stone-900 font-mono tracking-wider focus:bg-white focus:outline-hidden focus:ring-1 focus:ring-emerald-500">
+                            <span id="admin_phone_error" class="hidden text-[11px] font-bold text-rose-600 block mt-1"></span>
                         </div>
                     </div>
 
@@ -735,6 +747,86 @@
 
 @push('scripts')
 <script>
+        function formatAccountName(input) {
+        // Strip invalid characters (allow letters, spaces, dots, hyphens, and apostrophes)
+        let val = input.value.replace(/[^a-zA-Z\s\.\-']/g, '');
+        // Capitalize first letter of every word
+        val = val.replace(/(^|[\s\.\-'])([a-z])/g, function(match, sep, char) {
+            return sep + char.toUpperCase();
+        });
+        input.value = val;
+    }
+
+    function formatPhoneNumber(input, errorId, counterId) {
+        // Extract only digits
+        let digits = input.value.replace(/\D/g, '');
+
+        // If user enters international 639..., change to 09...
+        if (digits.startsWith('639')) {
+            digits = '09' + digits.substring(3);
+        } else if (digits.startsWith('9')) {
+            // Auto prefix 0 if user starts with 9
+            digits = '0' + digits;
+        } else if (digits.length >= 1 && digits[0] !== '0') {
+            digits = '09' + digits;
+        } else if (digits.length >= 2 && digits.substring(0, 2) !== '09') {
+            digits = '09' + digits.substring(2);
+        }
+
+        if (digits.length > 11) {
+            digits = digits.substring(0, 11);
+        }
+
+        input.value = digits;
+
+        if (counterId) {
+            const counter = document.getElementById(counterId);
+            if (counter) {
+                counter.textContent = digits.length + '/11';
+                counter.className = digits.length === 11 
+                    ? 'text-[10px] font-bold text-emerald-600' 
+                    : 'text-[10px] font-bold text-stone-400';
+            }
+        }
+
+        if (errorId) {
+            const errorEl = document.getElementById(errorId);
+            if (errorEl) {
+                if (digits.length > 0 && digits.length < 11) {
+                    errorEl.textContent = 'Kulang pa ng ' + (11 - digits.length) + ' digit(s). Dapat 11 digits simula sa 09.';
+                    errorEl.classList.remove('hidden');
+                    input.classList.add('border-amber-400', 'bg-amber-50/30');
+                } else if (digits.length === 11 && !digits.startsWith('09')) {
+                    errorEl.textContent = 'Dapat magsimula sa 09 ang mobile number.';
+                    errorEl.classList.remove('hidden');
+                    input.classList.add('border-rose-400', 'bg-rose-50/30');
+                } else {
+                    errorEl.classList.add('hidden');
+                    input.classList.remove('border-amber-400', 'bg-amber-50/30', 'border-rose-400', 'bg-rose-50/30');
+                }
+            }
+        }
+    }
+
+    function validateCashoutForm(form) {
+        const phoneInput = form.querySelector('input[name="account_number"]');
+        if (phoneInput) {
+            const val = phoneInput.value.replace(/\D/g, '');
+            if (val.length !== 11 || !val.startsWith('09')) {
+                alert('Paki-ayos ang Mobile / Account number:\nDapat eksaktong 11 digits at nagsisimula sa 09 (Hal. 09171234567).');
+                phoneInput.focus();
+                return false;
+            }
+        }
+        const nameInput = form.querySelector('input[name="account_name"]');
+        if (nameInput && nameInput.value.trim().length < 2) {
+            alert('Paki-lagay ang kumpletong Account Holder Name.');
+            nameInput.focus();
+            return false;
+        }
+        return true;
+    }
+
     function openExpenseModal() {
         const modal = document.getElementById('addExpenseModal');
         if (modal) modal.classList.remove('hidden');
